@@ -1,0 +1,33 @@
+body {
+  background-color: #64141f;
+  font-family: "Roboto", sans-serif;
+}
+
+.card {
+  border: none;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+.input-group .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.input-group input {
+  border-right: none;
+}
+
+.btn {
+  border-radius: 50px;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
