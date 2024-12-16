@@ -7,12 +7,14 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 // const jsPDF = dynamic(() => import("jspdf"), { ssr: false });
 
 export default function Participant() {
   const { participant, userId, displayParticipant, roleId } = useAppContext();
   const [loading, setLoading] = useState(null);
   const [isloading, setIsLoading] = useState(null);
+  const router = useRouter();
   // Pagination state
 
   useEffect(() => {
@@ -22,6 +24,7 @@ export default function Participant() {
       router.push("/auth/login");
     }
   }, [roleId, router]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 4;
 

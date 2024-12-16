@@ -22,7 +22,11 @@ function EditParticipantContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id"); // Get participant ID from query string
   const [registration_date, setRegistration_date] = useState(null);
-
+  useEffect(() => {
+    if (roleId !== 2) {
+      router.push("/auth/login");
+    }
+  }, [roleId, router]);
   const [formData, setFormData] = useState({
     event_id: "",
     participant_name: "",
@@ -32,13 +36,7 @@ function EditParticipantContent() {
     participant_picture_file_path: null,
     participant_remarks: "",
   });
-  useEffect(() => {
-    if (roleId == 2) {
-      router.push("/dashboard/participant/edit");
-    } else {
-      router.push("/auth/login");
-    }
-  }, [roleId, router]);
+
   // Fetch participant data
   useEffect(() => {
     const fetchEvent = async () => {
@@ -290,23 +288,19 @@ function EditParticipantContent() {
           />
         </div>
 
-        {/* Submit Button */}
-        <div className="text-center">
+        <div className="d-flex justify-content-between">
+          <button type="submit" className="btn btn-success">
+            Update Event
+          </button>
           <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={isSubmitting}
+            type="button"
+            className="btn btn-danger"
+            onClick={handleCancel}
           >
-            {isSubmitting ? "Updating..." : "Update"}
+            Cancel
           </button>
         </div>
       </form>
-
-      <div className="mt-3 text-center">
-        <button className="btn btn-secondary" onClick={handleCancel}>
-          Cancel
-        </button>
-      </div>
     </div>
   );
 }

@@ -33,9 +33,7 @@ function EditEventContent() {
     event_id: "",
   });
   useEffect(() => {
-    if (roleId == 2) {
-      router.push("/event/edit");
-    } else {
+    if (roleId !== 2) {
       router.push("/auth/login");
     }
   }, [roleId, router]);
