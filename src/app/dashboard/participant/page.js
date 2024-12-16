@@ -69,8 +69,7 @@ export default function Participant() {
       }
     }
   };
-
-  //Printing Certificate
+  //new code parinting Certificate
   const handlePrintCertificate = async (id) => {
     try {
       setLoading(id); // Start loading
@@ -94,7 +93,7 @@ export default function Participant() {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      const image = new Image();
+      const image = new window.Image(); // Use global Image object
       image.src = imgBase64;
 
       // Wait for the image to load
@@ -148,6 +147,84 @@ export default function Participant() {
     }
   };
 
+  //Printing Certificate
+  // const handlePrintCertificate = async (id) => {
+  //   try {
+  //     setLoading(id); // Start loading
+
+  //     // Step 1: Fetch participant data
+  //     const res = await fetch(
+  //       `http://51.112.24.26:5001/api/participant/getOne/${id}`
+  //     );
+  //     const fetchdata = await res.json();
+  //     const maindata = fetchdata.data;
+
+  //     console.log("Fetched Data:", maindata);
+
+  //     // Step 2: Load the certificate image
+  //     const imgUrl = `http://51.112.24.26:5001/${maindata.event_certificate_file_path}`;
+  //     const img = await fetch(imgUrl);
+  //     const blob = await img.blob();
+  //     const imgBase64 = await blobToBase64(blob);
+
+  //     // Step 3: Create a canvas and draw the certificate image
+  //     const canvas = document.createElement("canvas");
+  //     const ctx = canvas.getContext("2d");
+
+  //     const image = new Image();
+  //     image.src = imgBase64;
+
+  //     // Wait for the image to load
+  //     image.onload = () => {
+  //       canvas.width = image.width;
+  //       canvas.height = image.height;
+
+  //       // Draw the certificate image on the canvas
+  //       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  //       // Step 4: Add the participant's name to the canvas
+  //       ctx.font = "bold 40px Arial";
+  //       ctx.fillStyle = "#000"; // Black color
+  //       ctx.textAlign = "center";
+
+  //       // Position the text (adjust these values based on your certificate template)
+  //       ctx.fillText(
+  //         maindata.participant_name,
+  //         canvas.width / 2,
+  //         canvas.height / 2 + 50
+  //       );
+
+  //       // Step 5: Convert the canvas to a data URL
+  //       const updatedImgBase64 = canvas.toDataURL("image/png");
+
+  //       // Step 6: Generate the PDF using jsPDF
+  //       const pdf = new jsPDF({
+  //         orientation: "landscape", // Adjust based on your certificate
+  //         unit: "px",
+  //         format: [canvas.width, canvas.height], // Match the image dimensions
+  //       });
+
+  //       pdf.addImage(
+  //         updatedImgBase64,
+  //         "PNG",
+  //         0,
+  //         0,
+  //         canvas.width,
+  //         canvas.height
+  //       );
+
+  //       // Save the PDF locally or process further
+  //       pdf.save(`${maindata.participant_name}-Certificate.pdf`);
+
+  //       setLoading(null); // End loading
+  //     };
+  //   } catch (error) {
+  //     console.error("Error occurred while processing the certificate:", error);
+  //     alert("An error occurred while processing the certificate.");
+  //     setLoading(null); // End loading in case of error
+  //   }
+  // };
+
   // Email Certificate
   const handleEmailCertificate = async (id) => {
     setIsLoading(id);
@@ -171,7 +248,8 @@ export default function Participant() {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      const image = new Image();
+      // const image = new Image();
+      const image = new window.Image(); // Use global Image object
       image.src = imgBase64;
 
       // Wait for the image to load
