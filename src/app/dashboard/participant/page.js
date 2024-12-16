@@ -3,7 +3,7 @@ import Link from "next/link";
 import jsPDF from "jspdf";
 import dynamic from "next/dynamic";
 import { FaEdit, FaTrashAlt, FaEnvelope, FaPrint } from "react-icons/fa"; // Font Awesome React Icons
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
