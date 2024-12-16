@@ -6,7 +6,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
 } from "react-icons/fa"; // Font Awesome React Icons
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useAppContext } from "@/context/AppContext";
@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import Image from "next/image";
 
 export default function Event() {
-  const { event, userId, eventDisplay } = useAppContext();
+  const { event, userId, roleId, eventDisplay } = useAppContext();
   const router = useRouter();
 
   // Pagination state
@@ -27,6 +27,13 @@ export default function Event() {
   const currentEvents = event?.slice(indexOfFirstEvent, indexOfLastEvent);
   const totalPages = Math.ceil(event?.length / eventsPerPage);
 
+  useEffect(() => {
+    if (roleId == 2) {
+      router.push("/dashboard/event");
+    } else {
+      router.push("/auth/login");
+    }
+  }, [roleId, router]);
   // Page change handler
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { format } from "date-fns";
 import { FaTrashAlt } from "react-icons/fa";
+import { useAppContext } from "@/context/AppContext";
+import { useRouter } from "next/navigation";
 
 export default function EventSummary() {
   const [filters, setFilters] = useState({
@@ -14,12 +16,20 @@ export default function EventSummary() {
     mobile_number: "",
     email: "",
   });
-
+  const router = useRouter();
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { roleId } = useAppContext();
 
+  useEffect(() => {
+    if (roleId == 2) {
+      router.push("/dashboard/report/eventParticipant");
+    } else {
+      router.push("/auth/login");
+    }
+  }, [roleId, router]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 

@@ -10,10 +10,18 @@ import Image from "next/image";
 // const jsPDF = dynamic(() => import("jspdf"), { ssr: false });
 
 export default function Participant() {
-  const { participant, userId, displayParticipant } = useAppContext();
+  const { participant, userId, displayParticipant, roleId } = useAppContext();
   const [loading, setLoading] = useState(null);
   const [isloading, setIsLoading] = useState(null);
   // Pagination state
+
+  useEffect(() => {
+    if (roleId == 2) {
+      router.push("/dashboard/participant");
+    } else {
+      router.push("/auth/login");
+    }
+  }, [roleId, router]);
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 4;
 

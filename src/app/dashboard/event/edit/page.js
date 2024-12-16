@@ -14,6 +14,7 @@ function EditEventContent() {
     eventDisplay,
     eventParticipantDisplay,
     eventParticipantSummary,
+    roleId,
   } = useAppContext();
 
   const router = useRouter();
@@ -31,7 +32,13 @@ function EditEventContent() {
     is_active: false,
     event_id: "",
   });
-
+  useEffect(() => {
+    if (roleId == 2) {
+      router.push("/event/edit");
+    } else {
+      router.push("/auth/login");
+    }
+  }, [roleId, router]);
   useEffect(() => {
     const fetchEvent = async () => {
       const res = await fetch(

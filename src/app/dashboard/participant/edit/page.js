@@ -15,6 +15,7 @@ function EditParticipantContent() {
     displayParticipant,
     eventParticipantDisplay,
     eventParticipantSummary,
+    roleId,
   } = useAppContext();
 
   const router = useRouter();
@@ -31,7 +32,13 @@ function EditParticipantContent() {
     participant_picture_file_path: null,
     participant_remarks: "",
   });
-
+  useEffect(() => {
+    if (roleId == 2) {
+      router.push("/dashboard/participant/edit");
+    } else {
+      router.push("/auth/login");
+    }
+  }, [roleId, router]);
   // Fetch participant data
   useEffect(() => {
     const fetchEvent = async () => {

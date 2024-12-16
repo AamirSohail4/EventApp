@@ -2,7 +2,7 @@
 
 import { useAppContext } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -13,6 +13,7 @@ export default function AddParticipant() {
     displayParticipant,
     eventParticipantDisplay,
     eventParticipantSummary,
+    roleId,
   } = useAppContext();
   console.log("event", event);
   const router = useRouter();
@@ -46,7 +47,13 @@ export default function AddParticipant() {
         type === "checkbox" ? checked : type === "file" ? files[0] : value,
     }));
   };
-
+  useEffect(() => {
+    if (roleId == 2) {
+      router.push("/dashboard/participant/add");
+    } else {
+      router.push("/auth/login");
+    }
+  }, [roleId, router]);
   const handleSubmit = async (e) => {
     e.preventDefault();
 
