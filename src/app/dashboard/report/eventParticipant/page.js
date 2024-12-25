@@ -31,7 +31,7 @@ export default function EventSummary() {
     }
   }, [roleId, router]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
 
   // Fetch all events on component mount
   const fetchAllEvents = useCallback(async () => {

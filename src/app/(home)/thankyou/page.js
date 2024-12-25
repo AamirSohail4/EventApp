@@ -8,8 +8,8 @@ export default function ThankYouPage() {
         <p className="fs-5 text-muted">Thanks for registering in the event.</p>
         <p>We look forward to seeing you there!</p>
         <div>
-          <Link href="/">
-            <a className="btn btn-primary mt-3">Back to Home</a>
+          <Link href="/" className="btn btn-primary mt-3">
+            Back to Home
           </Link>
         </div>
       </div>

@@ -15,15 +15,11 @@ export default function AddParticipant() {
     eventParticipantSummary,
     roleId,
   } = useAppContext();
-  console.log("event", event);
-  const router = useRouter();
-  const [Event, setEvent] = useState([]);
-  const [registration_date, setRgistration_date] = useState(null);
 
-  // Handle date change
-  const handleFromDateChange = (date) => {
-    setRgistration_date(date);
-  };
+  const router = useRouter();
+  const [errors, setErrors] = useState({});
+  const [registration_date, setRegistrationDate] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     event_id: "",
@@ -36,9 +32,14 @@ export default function AddParticipant() {
     user_id: "",
   });
 
-  // Loading state
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Redirect based on role
+  // useEffect(() => {
+  //   if (roleId !== 2) {
+  //     router.push("/auth/login");
+  //   }
+  // }, [roleId, router]);
 
+  // Handle input change
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     setFormData((prev) => ({
@@ -47,17 +48,63 @@ export default function AddParticipant() {
         type === "checkbox" ? checked : type === "file" ? files[0] : value,
     }));
   };
-  useEffect(() => {
-    if (roleId == 2) {
-      router.push("/dashboard/participant/add");
-    } else {
-      router.push("/auth/login");
+
+  // Handle date change
+  const handleFromDateChange = (date) => {
+    setRegistrationDate(date);
+  };
+
+  // Validate form fields
+  const validateForm = () => {
+    const errors = {};
+
+    // Validate participant name
+    if (!formData.participant_name.trim()) {
+      errors.participant_name = "Participant name is required.";
+    } else if (!/^[A-Za-z\s]+$/.test(formData.participant_name.trim())) {
+      errors.participant_name =
+        "Participant name should only contain alphabets.";
     }
-  }, [roleId, router]);
+
+    // Validate mobile number
+    if (!formData.participant_phone_number.trim()) {
+      errors.participant_phone_number = "Mobile number is required.";
+    } else if (!/^\d+$/.test(formData.participant_phone_number.trim())) {
+      errors.participant_phone_number =
+        "Mobile number should only contain numbers.";
+    } else if (
+      formData.participant_phone_number.trim().length < 11 ||
+      formData.participant_phone_number.trim().length > 12
+    ) {
+      errors.participant_phone_number =
+        "Mobile number should be between 11 to 12 digits.";
+    }
+
+    // Validate email
+    if (!formData.participant_email.trim()) {
+      errors.participant_email = "Email is required.";
+    } else if (
+      !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.participant_email.trim())
+    ) {
+      errors.participant_email = "Email is not valid.";
+    }
+
+    // Validate event selection
+    if (!formData.event_id.trim()) {
+      errors.event_id = "Event selection is required.";
+    }
+
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
 
-    // Set loading state to true while submitting
     setIsSubmitting(true);
 
     try {
@@ -79,7 +126,7 @@ export default function AddParticipant() {
       );
       data.append("participant_email", formData.participant_email);
       data.append("participant_remarks", formData.participant_remarks);
-      data.append("user_id", userId); // Add user_id if applicable
+      data.append("user_id", userId);
 
       if (formData.participant_picture_file_path) {
         data.append(
@@ -92,7 +139,7 @@ export default function AddParticipant() {
         "http://51.112.24.26:5001/api/participant/addNew",
         {
           method: "POST",
-          body: data, // Send as FormData
+          body: data,
         }
       );
 
@@ -100,15 +147,14 @@ export default function AddParticipant() {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
 
-      alert("Participant added successfully.");
+      alert("Participant registered successfully.");
       displayParticipant();
-      eventParticipantDisplay(),
-        eventParticipantSummary(),
-        router.push("/dashboard/participant");
+      eventParticipantDisplay();
+      eventParticipantSummary();
+      router.push("/dashboard/participant");
     } catch (error) {
       console.error("Failed to submit participant data:", error);
     } finally {
-      // Set loading state to false after submission is complete
       setIsSubmitting(false);
     }
   };
@@ -123,15 +169,15 @@ export default function AddParticipant() {
       <form onSubmit={handleSubmit}>
         {/* Event Name */}
         <div className="mb-3">
-          <label htmlFor="eventName" className="form-label">
+          <label htmlFor="event_id" className="form-label">
             Event Name<span style={{ color: "red" }}>*</span>
           </label>
           <select
-            required
             className="form-select"
             name="event_id"
             onChange={handleChange}
             value={formData.event_id}
+            required
           >
             <option value="">Select Event</option>
             {event.map((option, index) => (
@@ -145,25 +191,27 @@ export default function AddParticipant() {
         {/* Registration Date */}
         <div className="mb-3">
           <label htmlFor="registration_date" className="form-label">
-            Registration Date <span style={{ color: "red" }}>*</span>
+            Registration Date<span style={{ color: "red" }}>*</span>
           </label>
           <DatePicker
             selected={registration_date}
-            className="form-control" // Make DatePicker have the same style as other inputs
+            className="form-control"
             onChange={handleFromDateChange}
-            dateFormat="dd/MM/yyyy" // Show DD/MM/YYYY format in calendar
-            placeholderText="DD/MM/YYYY" // Placeholder to indicate format
+            dateFormat="dd/MM/yyyy"
+            placeholderText="DD/MM/YYYY"
             isClearable
+            required
+            maxLength={13}
           />
         </div>
 
-        {/* Name */}
+        {/* Participant Name */}
         <div className="mb-3">
           <label htmlFor="participant_name" className="form-label">
             Name<span style={{ color: "red" }}>*</span>
           </label>
           <input
-            type="tel"
+            type="text"
             id="participant_name"
             name="participant_name"
             className="form-control"
@@ -171,10 +219,14 @@ export default function AddParticipant() {
             value={formData.participant_name}
             onChange={handleChange}
             required
+            maxLength={25}
           />
+          {errors.participant_name && (
+            <p className="error-message">{errors.participant_name}</p>
+          )}
         </div>
 
-        {/* Mobile Number */}
+        {/* Phone Number */}
         <div className="mb-3">
           <label htmlFor="participant_phone_number" className="form-label">
             Mobile Number<span style={{ color: "red" }}>*</span>
@@ -184,11 +236,15 @@ export default function AddParticipant() {
             id="participant_phone_number"
             name="participant_phone_number"
             className="form-control"
-            placeholder="Enter mobile number"
+            placeholder="e.g.,  0301-456-7890"
             value={formData.participant_phone_number}
             onChange={handleChange}
+            maxLength={13}
             required
           />
+          {errors.participant_phone_number && (
+            <p className="error-message">{errors.participant_phone_number}</p>
+          )}
         </div>
 
         {/* Email */}
@@ -205,7 +261,11 @@ export default function AddParticipant() {
             value={formData.participant_email}
             onChange={handleChange}
             required
+            maxLength={25}
           />
+          {errors.participant_email && (
+            <p className="error-message">{errors.participant_email}</p>
+          )}
         </div>
 
         {/* Picture */}
@@ -235,20 +295,24 @@ export default function AddParticipant() {
             placeholder="Enter remarks"
             value={formData.participant_remarks}
             onChange={handleChange}
+            maxLength={200}
           ></textarea>
         </div>
 
-        {/* Submit and Cancel Buttons */}
+        {/* Buttons */}
         <div className="d-flex">
           <button
             type="submit"
             className="btn btn-primary me-3"
-            disabled={isSubmitting} // Disable the button when submitting
+            disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting..." : "Submit"}
-            {/* Show loading text */}
           </button>
-          <button onClick={handleCancel} className="btn btn-danger">
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={handleCancel}
+          >
             Cancel
           </button>
         </div>

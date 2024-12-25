@@ -92,6 +92,13 @@ button.btn_submit {
   border: 0;
   display: block !important;
 }
+.error-message {
+  color: red; /* Red text color for errors */
+  font-size: 0.875rem; /* Smaller font size */
+  margin-top: 5px; /* Small margin for spacing */
+  font-weight: 500; /* Slightly bold text */
+  padding: 5px 0; /* Padding to separate it from other elements */
+}
 /* Mobile Styles */
 @media (max-width: 768px) {
   .navbarRight {

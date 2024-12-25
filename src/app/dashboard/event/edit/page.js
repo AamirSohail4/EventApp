@@ -20,6 +20,7 @@ function EditEventContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
+  const page = searchParams.get("page");
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,11 +33,12 @@ function EditEventContent() {
     is_active: false,
     event_id: "",
   });
-  useEffect(() => {
-    if (roleId !== 2) {
-      router.push("/auth/login");
-    }
-  }, [roleId, router]);
+  console.log("That is a page", page);
+  // useEffect(() => {
+  //   if (roleId !== 2) {
+  //     router.push("/auth/login");
+  //   }
+  // }, [roleId, router]);
   useEffect(() => {
     const fetchEvent = async () => {
       const res = await fetch(
@@ -121,7 +123,7 @@ function EditEventContent() {
       eventDisplay();
       eventParticipantDisplay();
       eventParticipantSummary();
-      router.push("/dashboard/event");
+      router.push(`/dashboard/event?page=${page}`);
     } else {
       alert("Error updating the event");
     }

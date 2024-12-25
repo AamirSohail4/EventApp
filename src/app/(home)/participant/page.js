@@ -17,12 +17,7 @@ export default function AddParticipant() {
   const router = useRouter();
   const [Event, setEvent] = useState([]);
   const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null); // Add toDate if needed in the future
-
-  // Handle date change
-  const handleFromDateChange = (date) => {
-    setFromDate(date);
-  };
+  const [errors, setErrors] = useState({});
 
   const [formData, setFormData] = useState({
     event_id: "",
@@ -37,6 +32,7 @@ export default function AddParticipant() {
 
   const [loading, setLoading] = useState(false); // State to manage button disabling
 
+  // Fetch events
   useEffect(() => {
     async function fetchEvents() {
       try {
@@ -50,22 +46,86 @@ export default function AddParticipant() {
         console.error("Failed to fetch events:", error);
       }
     }
-
     fetchEvents();
   }, []);
 
   const handleChange = (e) => {
-    const { name, value, type, checked, files } = e.target;
+    const { name, value, type, files } = e.target;
+
+    if (type === "file") {
+      const file = files[0];
+      if (file) {
+        const maxFileSize = 2 * 1024 * 1024; // 3 MB in bytes
+        if (file.size > maxFileSize) {
+          setErrors((prev) => ({
+            ...prev,
+            participant_picture_file_path: "File size should not exceed 2 MB.",
+          }));
+          return; // Do not update the formData if file size exceeds limit
+        } else {
+          // Clear the error if the file size is valid
+          setErrors((prev) => ({
+            ...prev,
+            participant_picture_file_path: undefined,
+          }));
+        }
+      }
+    }
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox" ? checked : type === "file" ? files[0] : value,
+      [name]: type === "file" ? files[0] : value,
     }));
   };
 
+  // Handle date change
+  const handleFromDateChange = (date) => {
+    setFromDate(date);
+  };
+
+  // Validate form data
+  const validateForm = () => {
+    const errors = {};
+
+    // Validate participant name
+    if (!formData.participant_name.trim()) {
+      errors.participant_name = "Participant name is required.";
+    } else if (!/^[A-Za-z\s]+$/.test(formData.participant_name.trim())) {
+      errors.participant_name =
+        "Participant name should only contain alphabets.";
+    }
+
+    // Validate mobile number
+    if (!formData.participant_phone_number.trim()) {
+      errors.participant_phone_number = "Mobile number is required.";
+    } else if (!/^\d+$/.test(formData.participant_phone_number.trim())) {
+      errors.participant_phone_number =
+        "Mobile number should only contain numbers.";
+    } else if (
+      formData.participant_phone_number.trim().length < 11 ||
+      formData.participant_phone_number.trim().length > 12
+    ) {
+      errors.participant_phone_number =
+        "Mobile number should be between 11 to 12 digits.";
+    }
+
+    // Validate email
+    if (!formData.participant_email.trim()) {
+      errors.participant_email = "Email is required.";
+    } else if (
+      !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.participant_email.trim())
+    ) {
+      errors.participant_email = "Email is not valid.";
+    }
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if (!validateForm()) {
+      return;
+    }
     if (loading) return; // Prevent multiple form submissions
 
     setLoading(true); // Set loading state to true
@@ -74,23 +134,21 @@ export default function AddParticipant() {
       const data = new FormData();
       data.append("event_id", formData.event_id);
       data.append("participant_name", formData.participant_name);
-
-      // Format date as YYYY-MM-DD
+      // Format date
       const formattedDate = fromDate
         ? `${fromDate.getFullYear()}-${String(fromDate.getMonth() + 1).padStart(
             2,
             "0"
           )}-${String(fromDate.getDate()).padStart(2, "0")}`
         : "";
-
-      data.append("registration_date", formattedDate); // Send formatted date
+      data.append("registration_date", formattedDate);
       data.append(
         "participant_phone_number",
         formData.participant_phone_number
       );
       data.append("participant_email", formData.participant_email);
       data.append("participant_remarks", formData.participant_remarks);
-      data.append("user_id", formData.user_id || ""); // Add user_id if applicable
+      data.append("user_id", formData.user_id || "");
 
       if (formData.participant_picture_file_path) {
         data.append(
@@ -101,22 +159,18 @@ export default function AddParticipant() {
 
       const res = await fetch(
         "http://51.112.24.26:5001/api/participant/addNew",
-        {
-          method: "POST",
-          body: data, // Send as FormData
-        }
+        { method: "POST", body: data }
       );
-
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
 
-      alert("Participant added successfully.");
+      alert("Participant register successfully.");
       router.push("/thankyou");
     } catch (error) {
       console.error("Failed to submit participant data:", error);
     } finally {
-      setLoading(false); // Reset loading state to false after request completion
+      setLoading(false); // Reset loading state
     }
   };
 
@@ -128,7 +182,7 @@ export default function AddParticipant() {
     <div className="container mt-5 custom_margin">
       <h1 className="mb-4">Add New Participant</h1>
       <form onSubmit={handleSubmit}>
-        {/* Event */}
+        {/* Event Selection */}
         <label htmlFor="event_id" className="form-label">
           Event <span style={{ color: "red" }}>*</span>
         </label>
@@ -156,11 +210,13 @@ export default function AddParticipant() {
           </label>
           <DatePicker
             selected={fromDate}
-            className="form-control" // Make DatePicker have the same style as other inputs
+            className="form-control"
             onChange={handleFromDateChange}
-            dateFormat="dd/MM/yyyy" // Show DD/MM/YYYY format in calendar
-            placeholderText="DD/MM/YYYY" // Placeholder to indicate format
+            dateFormat="dd/MM/yyyy"
+            placeholderText="DD/MM/YYYY"
             isClearable
+            required
+            maxLength={11}
           />
         </div>
 
@@ -177,8 +233,12 @@ export default function AddParticipant() {
             placeholder="Enter Participant name"
             value={formData.participant_name}
             onChange={handleChange}
+            maxLength={25}
             required
           />
+          {errors.participant_name && (
+            <p className="error-message">{errors.participant_name}</p>
+          )}
         </div>
 
         {/* Mobile Number */}
@@ -187,15 +247,19 @@ export default function AddParticipant() {
             Mobile Number <span style={{ color: "red" }}>*</span>
           </label>
           <input
-            type="text"
+            type="tel"
             id="participant_phone_number"
             name="participant_phone_number"
             className="form-control"
-            placeholder="Enter participant phone number"
+            placeholder="e.g.,  0301-456-7890"
             value={formData.participant_phone_number}
             onChange={handleChange}
             required
+            maxLength={13}
           />
+          {errors.participant_phone_number && (
+            <p className="error-message">{errors.participant_phone_number}</p>
+          )}
         </div>
 
         {/* Email */}
@@ -213,6 +277,9 @@ export default function AddParticipant() {
             onChange={handleChange}
             required
           />
+          {errors.participant_email && (
+            <p className="error-message">{errors.participant_email}</p>
+          )}
         </div>
 
         {/* Picture */}
@@ -228,6 +295,11 @@ export default function AddParticipant() {
             accept="image/*"
             onChange={handleChange}
           />
+          {errors.participant_picture_file_path && (
+            <p className="error-message">
+              {errors.participant_picture_file_path}
+            </p>
+          )}
         </div>
 
         {/* Remarks */}
@@ -242,6 +314,7 @@ export default function AddParticipant() {
             placeholder="Enter Remarks"
             value={formData.participant_remarks}
             onChange={handleChange}
+            maxLength={200}
           />
         </div>
 

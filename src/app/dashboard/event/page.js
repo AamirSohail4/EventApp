@@ -14,26 +14,22 @@ import { format } from "date-fns";
 import Image from "next/image";
 
 export default function Event() {
-  const { event, userId, roleId, eventDisplay } = useAppContext();
+  const { event, eventDisplay } = useAppContext();
   const router = useRouter();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const eventsPerPage = 4;
+  const eventsPerPage = 10;
+
+  // **Sort events by ID** in ascending order before processing
+  const sortedEvents = [...(event || [])].sort((a, b) => a.id - b.id);
 
   // Calculate pagination details
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  const currentEvents = event?.slice(indexOfFirstEvent, indexOfLastEvent);
-  const totalPages = Math.ceil(event?.length / eventsPerPage);
+  const currentEvents = sortedEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+  const totalPages = Math.ceil(sortedEvents.length / eventsPerPage);
 
-  useEffect(() => {
-    if (roleId == 2) {
-      router.push("/dashboard/event");
-    } else {
-      router.push("/auth/login");
-    }
-  }, [roleId, router]);
   // Page change handler
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -52,15 +48,22 @@ export default function Event() {
     }
   };
 
+  // **Handle returning to specific page after update**
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = urlParams.get("page");
+    if (page) {
+      setCurrentPage(Number(page));
+    }
+  }, []);
+
   const handleDelete = async (id) => {
-    // Confirm deletion action
     const confirmDelete = window.confirm(
       `Are you sure you want to delete the Event with ID: ${id}?`
     );
 
     if (confirmDelete) {
       try {
-        // Send DELETE request to the server
         const response = await fetch(
           `http://51.112.24.26:5001/api/event/delete/${id}`,
           {
@@ -69,8 +72,6 @@ export default function Event() {
         );
 
         if (response.ok) {
-          const result = await response.json();
-
           alert(`Event with ID: ${id} has been deleted successfully.`);
           eventDisplay();
         } else {
@@ -84,9 +85,6 @@ export default function Event() {
     }
   };
 
-  const handleCancel = () => {
-    router.push("/dashboard/event");
-  };
   return (
     <div className="container mt-5">
       <h1 className="mb-4">Event Management</h1>
@@ -100,7 +98,7 @@ export default function Event() {
       <table className="table table-striped table-bordered table-hover">
         <thead className="table-dark">
           <tr>
-            <th>ID</th>
+            <th>Sr</th>
             <th>Event Name</th>
             <th>Event From Date</th>
             <th>Event To Date</th>
@@ -113,10 +111,11 @@ export default function Event() {
         </thead>
         <tbody>
           {currentEvents.map((event, index) => {
-            const isExpired = new Date(event.event_to_date) < new Date(); // Check if event_to_date is before today's date
+            const globalIndex = indexOfFirstEvent + index + 1; // Global Sr number
+            const isExpired = new Date(event.event_to_date) < new Date();
             return (
               <tr key={event.id}>
-                <td>{index + 1}</td>
+                <td>{globalIndex}</td>
                 <td>{event.event_name}</td>
                 <td>{format(new Date(event.event_from_date), "dd-MM-yyyy")}</td>
                 <td>{format(new Date(event.event_to_date), "dd-MM-yyyy")}</td>
@@ -125,12 +124,12 @@ export default function Event() {
                   <Image
                     src={
                       event.event_certificate_file_path
-                        ? `http://51.112.24.26:5001/${event.event_certificate_file_path}` // Full URL with the prefix
-                        : "/images/product.jpg" // Path to your dummy image
+                        ? `http://51.112.24.26:5001/${event.event_certificate_file_path}`
+                        : "/images/product.jpg"
                     }
                     alt="Event Certificate"
-                    width={50} // Width in pixels
-                    height={50} // Height in pixels
+                    width={50}
+                    height={50}
                     style={{
                       border: "2px solid",
                       objectFit: "contain",
@@ -141,12 +140,12 @@ export default function Event() {
                   <Image
                     src={
                       event.event_banner_file_path
-                        ? `http://51.112.24.26:5001/${event.event_banner_file_path}` // Full URL with the prefix
-                        : "/images/product.jpg" // Path to your dummy image
+                        ? `http://51.112.24.26:5001/${event.event_banner_file_path}`
+                        : "/images/product.jpg"
                     }
                     alt="Event Banner"
-                    width={50} // Width in pixels
-                    height={50} // Height in pixels
+                    width={50}
+                    height={50}
                     style={{
                       border: "2px solid",
                       objectFit: "contain",
@@ -166,9 +165,10 @@ export default function Event() {
                     />
                   )}
                 </td>
-
                 <td style={{ textAlign: "center", verticalAlign: "middle" }}>
-                  <Link href={`/dashboard/event/edit?id=${event.id}`}>
+                  <Link
+                    href={`/dashboard/event/edit?id=${event.id}&page=${currentPage}`}
+                  >
                     <FaEdit
                       className="text-primary me-3"
                       style={{ cursor: "pointer" }}

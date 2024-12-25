@@ -169,10 +169,11 @@ export default function AddEvent() {
             placeholder="Enter event name"
             value={formData.event_name}
             onChange={handleChange}
+            required
           />
-          {errors.event_name && (
+          {/* {errors.event_name && (
             <p style={{ color: "red" }}>{errors.event_name}</p>
-          )}
+          )} */}
         </div>
 
         <div className="mb-3">
@@ -186,6 +187,8 @@ export default function AddEvent() {
             dateFormat="dd/MM/yyyy"
             placeholderText="DD/MM/YYYY"
             isClearable
+            required
+            maxLength={11}
           />
         </div>
 
@@ -200,6 +203,8 @@ export default function AddEvent() {
             dateFormat="dd/MM/yyyy"
             placeholderText="DD/MM/YYYY"
             isClearable
+            required
+            maxLength={11}
           />
         </div>
 
@@ -215,6 +220,8 @@ export default function AddEvent() {
             placeholder="Enter event place"
             value={formData.event_location}
             onChange={handleChange}
+            required
+            maxLength={60}
           />
           {errors.event_location && (
             <p style={{ color: "red" }}>{errors.event_location}</p>

@@ -21,6 +21,7 @@ function EditParticipantContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id"); // Get participant ID from query string
+  const page = searchParams.get("page");
   const [registration_date, setRegistration_date] = useState(null);
   useEffect(() => {
     if (roleId !== 2) {
@@ -129,7 +130,7 @@ function EditParticipantContent() {
         displayParticipant();
         eventParticipantDisplay(),
           eventParticipantSummary(),
-          router.push("/dashboard/participant");
+          router.push(`/dashboard/participant?page=${page}`);
       } else {
         alert("Error updating the participant");
       }
