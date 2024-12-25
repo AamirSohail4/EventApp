@@ -90,7 +90,7 @@ export default function Participant() {
 
       // Step 1: Fetch participant data
       const res = await fetch(
-        `http://localhost:4040/api/participant/getOne/${id}`
+        `http://51.112.24.26:5001/api/participant/getOne/${id}`
       );
       const fetchdata = await res.json();
       const maindata = fetchdata.data;
@@ -114,7 +114,7 @@ export default function Participant() {
       const formattedId = String(id).padStart(6, "0"); // Format ID as 000001
       const text = `LTBA-${formattedId}-${shortYear}`;
       // Step 2: Load the certificate image
-      const imgUrl = `http://localhost:4040/${maindata.event_certificate_file_path}`;
+      const imgUrl = `http://51.112.24.26:5001/${maindata.event_certificate_file_path}`;
       const img = await fetch(imgUrl);
       const blob = await img.blob();
       const imgBase64 = await blobToBase64(blob);
@@ -268,7 +268,7 @@ export default function Participant() {
     try {
       // Step 1: Fetch participant data
       const res = await fetch(
-        `http://localhost:4040/api/participant/getOne/${id}`
+        `http://51.112.24.26:5001/api/participant/getOne/${id}`
       );
       const fetchdata = await res.json();
       const maindata = fetchdata.data;
@@ -292,7 +292,7 @@ export default function Participant() {
       const text = `LTBA-${formattedId}-${shortYear}`;
 
       // Step 2: Load the certificate image
-      const imgUrl = `http://localhost:4040/${maindata.event_certificate_file_path}`;
+      const imgUrl = `http://51.112.24.26:5001/${maindata.event_certificate_file_path}`;
       const img = await fetch(imgUrl);
       const blob = await img.blob();
       const imgBase64 = await blobToBase64(blob);
@@ -403,7 +403,7 @@ export default function Participant() {
       formData.append("event_name", maindata.event_name);
 
       const emailRes = await fetch(
-        "http://localhost:4040/api/email/sendEmail",
+        "http://51.112.24.26:5001/api/email/sendEmail",
         {
           method: "POST",
           body: formData,
