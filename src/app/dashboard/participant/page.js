@@ -123,7 +123,7 @@ export default function Participant() {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      const image = new Image();
+      const image = new window.Image();
       image.src = imgBase64;
 
       // Wait for the image to load
@@ -222,7 +222,7 @@ export default function Participant() {
         );
 
         // Step 5: Draw the QR code onto the canvas
-        const qrImage = new Image();
+        const qrImage = new window.Image();
         qrImage.src = qrCodeDataURL;
         qrImage.onload = () => {
           const qrSize = 200;
@@ -301,7 +301,7 @@ export default function Participant() {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      const image = new Image();
+      const image = new window.Image();
       image.src = imgBase64;
 
       // Wait for the image to load
@@ -368,7 +368,7 @@ export default function Participant() {
         maindata.participant_name
       );
 
-      const qrImage = new Image();
+      const qrImage = new window.Image();
       qrImage.src = qrCodeDataURL;
       await new Promise((resolve) => (qrImage.onload = resolve));
 
@@ -443,7 +443,7 @@ export default function Participant() {
       const qrCodeElement = <QRCode value={value} size={250} />;
       const svgString = renderToStaticMarkup(qrCodeElement);
 
-      const img = new Image();
+      const img = new window.Image();
       const svg64 = btoa(svgString);
       const b64Data = "data:image/svg+xml;base64," + svg64;
       img.src = b64Data;
