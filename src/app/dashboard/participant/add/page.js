@@ -196,7 +196,7 @@ export default function AddParticipant() {
       }
 
       const response = await fetch(
-        "`http://51.112.24.26:5001/api/participant/addNew",
+        "http://51.112.24.26:5001/api/participant/addNew",
         {
           method: "POST",
           body: data,

@@ -161,7 +161,7 @@ export default function AddParticipant() {
       }
 
       const response = await fetch(
-        "`http://51.112.24.26:5001/api/participant/addNew",
+        "http://51.112.24.26:5001/api/participant/addNew",
         { method: "POST", body: data }
       );
       if (response.ok) {
@@ -333,6 +333,7 @@ export default function AddParticipant() {
 
       if (emailRes.ok) {
         alert("Certificate emailed successfully!");
+        router.push("/");
       } else {
         console.error(emailResult.message);
         alert("Failed to send the certificate email.");
