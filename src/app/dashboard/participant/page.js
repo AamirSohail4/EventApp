@@ -84,6 +84,183 @@ export default function Participant() {
     }
   };
   //new code parinting Certificate
+  // const handlePrintCertificate = async (id) => {
+  //   try {
+  //     setLoading(id); // Start loading
+
+  //     // Step 1: Fetch participant data
+  //     const res = await fetch(
+  //       `http://51.112.24.26:5001/api/participant/getOne/${id}`
+  //     );
+  //     const fetchdata = await res.json();
+  //     const maindata = fetchdata.data;
+
+  //     console.log("Fetched Data:", maindata);
+
+  //     const eventDate = new Date(maindata.event_from_date);
+  //     const day = eventDate.toLocaleDateString("en-US", { weekday: "long" });
+  //     const month = eventDate.toLocaleDateString("en-US", { month: "long" });
+  //     const date = eventDate.getDate();
+  //     const year = eventDate.getFullYear();
+  //     const shortYear = year.toString().slice(-2);
+
+  //     // Determine the ordinal suffix
+  //     const suffix = (() => {
+  //       if (date % 10 === 1 && date !== 11) return "st";
+  //       if (date % 10 === 2 && date !== 12) return "nd";
+  //       if (date % 10 === 3 && date !== 13) return "rd";
+  //       return "th";
+  //     })();
+  //     const formattedId = String(id).padStart(6, "0"); // Format ID as 000001
+  //     const text = `LTBA-${formattedId}-${shortYear}`;
+  //     // Step 2: Load the certificate image
+  //     const imgUrl = `http://51.112.24.26:5001/${maindata.event_certificate_file_path}`;
+  //     const img = await fetch(imgUrl);
+  //     const blob = await img.blob();
+  //     const imgBase64 = await blobToBase64(blob);
+
+  //     // Step 3: Create a canvas and draw the certificate image
+  //     const canvas = document.createElement("canvas");
+  //     const ctx = canvas.getContext("2d");
+
+  //     const image = new window.Image();
+  //     image.src = imgBase64;
+
+  //     // Wait for the image to load
+  //     image.onload = async () => {
+  //       canvas.width = image.width;
+  //       canvas.height = image.height;
+
+  //       // Draw the certificate image on the canvas
+  //       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  //       // Define the starting position for the first line of text
+  //       let startY = canvas.height / 2 - 20; // Starting position for participant_name
+
+  //       // Participant's name
+  //       ctx.font = " 76px Arial";
+  //       ctx.fillStyle = "#000";
+  //       ctx.textAlign = "left";
+  //       ctx.fillText(maindata.participant_name, 400, startY);
+  //       // text
+
+  //       // Increment the y-position for the next line
+  //       startY += 200;
+  //       // Event name with word spacing
+  //       ctx.font = "bold 50px Arial";
+  //       ctx.fillStyle = "#9f3332";
+  //       let eventNameX = 230;
+  //       const eventNameWords = maindata.event_name.split(" "); // Split the event name into words
+  //       eventNameWords.forEach((word) => {
+  //         ctx.fillText(word, eventNameX, startY); // Draw each word
+  //         eventNameX += ctx.measureText(word).width + 20; // Add spacing between words (20px)
+  //       });
+
+  //       // // Event name
+  //       // ctx.font = "bold 50px Arial";
+  //       // ctx.fillStyle = "#9f3332";
+  //       // ctx.fillText(maindata.event_name, 230, startY);
+
+  //       // Increment the y-position for the next line
+  //       startY += 200;
+
+  //       // Fixed text: Lahore Tax Bar Association
+  //       ctx.font = "bold 50px Arial"; // Individual font size
+  //       ctx.fillStyle = "#0ca95d"; // Color for fixed text
+  //       ctx.fillText("Lahore Tax Bar Association", 510, startY);
+
+  //       // Move the starting position 300px below the fixed text
+  //       startY += 130;
+
+  //       // Base positions for date text
+  //       let startX = 510; // Starting X position
+
+  //       // Set font for the date text
+  //       ctx.font = " 40px Arial";
+  //       ctx.fillStyle = "#000";
+  //       ctx.textAlign = "left";
+
+  //       // Draw day
+  //       ctx.fillText(`${day},`, startX, startY);
+
+  //       // Measure and increment X position
+  //       startX += ctx.measureText(`${day}, `).width;
+
+  //       // Draw date
+  //       ctx.fillText(`${date}`, startX, startY);
+
+  //       // Adjust for suffix position (slightly above the main text)
+  //       ctx.font = "20px Arial"; // Smaller font for the suffix
+  //       ctx.fillText(
+  //         suffix,
+  //         startX + ctx.measureText(`${date}`).width + 25,
+  //         startY - 10
+  //       );
+
+  //       // Reset font and increment X for "of"
+  //       ctx.font = " 40px Arial";
+  //       startX += ctx.measureText(`${date}${suffix}`).width - 20;
+
+  //       // Draw "of Month"
+  //       ctx.fillText(` of ${month},`, startX, startY);
+
+  //       // Increment X for year
+  //       startX += ctx.measureText(` of ${month}, `).width;
+
+  //       // Draw year
+  //       ctx.fillText(`${year}`, startX, startY);
+
+  //       startY += 330;
+  //       ctx.font = " 20px Arial";
+  //       ctx.fillStyle = "#ffffff";
+  //       ctx.textAlign = "left";
+  //       ctx.fillText(text, 2180, startY);
+  //       // Step 4: Generate the QR code image for the bottom-right corner
+  //       const qrCodeDataURL = await generateQRCodeImage(
+  //         maindata.id,
+  //         maindata.participant_name
+  //       );
+
+  //       // Step 5: Draw the QR code onto the canvas
+  //       const qrImage = new window.Image();
+  //       qrImage.src = qrCodeDataURL;
+  //       qrImage.onload = () => {
+  //         const qrSize = 200;
+  //         // Size of the QR code
+  //         const xPosition = canvas.width - qrSize - 200; // Position from the right
+  //         const yPosition = canvas.height - qrSize - 100; // Position from the bottom
+  //         ctx.drawImage(qrImage, xPosition, yPosition, qrSize, qrSize);
+
+  //         // Create the PDF with the certificate and QR code
+  //         const updatedImgBase64 = canvas.toDataURL("image/png");
+
+  //         // Generate the PDF using jsPDF
+  //         const pdf = new jsPDF({
+  //           orientation: "landscape",
+  //           unit: "px",
+  //           format: [canvas.width, canvas.height],
+  //         });
+
+  //         pdf.addImage(
+  //           updatedImgBase64,
+  //           "PNG",
+  //           0,
+  //           0,
+  //           canvas.width,
+  //           canvas.height
+  //         );
+
+  //         // Save the PDF locally or process further
+  //         pdf.save(`${maindata.participant_name}-Certificate.pdf`);
+  //         setLoading(null); // End loading
+  //       };
+  //     };
+  //   } catch (error) {
+  //     console.error("Error occurred while processing the certificate:", error);
+  //     alert("An error occurred while processing the certificate.");
+  //     setLoading(null); // End loading in case of error
+  //   }
+  // };
   const handlePrintCertificate = async (id) => {
     try {
       setLoading(id); // Start loading
@@ -113,14 +290,17 @@ export default function Participant() {
       })();
       const formattedId = String(id).padStart(6, "0"); // Format ID as 000001
       const text = `LTBA-${formattedId}-${shortYear}`;
+
       // Step 2: Load the certificate image
       const imgUrl = `http://51.112.24.26:5001/${maindata.event_certificate_file_path}`;
       const img = await fetch(imgUrl);
       const blob = await img.blob();
       const imgBase64 = await blobToBase64(blob);
 
-      // Step 3: Create a canvas and draw the certificate image
+      // Step 3: Create a canvas and set the size to 2560x1810
       const canvas = document.createElement("canvas");
+      canvas.width = 2560;
+      canvas.height = 1810;
       const ctx = canvas.getContext("2d");
 
       const image = new window.Image();
@@ -128,21 +308,36 @@ export default function Participant() {
 
       // Wait for the image to load
       image.onload = async () => {
-        canvas.width = image.width;
-        canvas.height = image.height;
+        // Adjust the image size to fit the canvas dimensions
+        const aspectRatio = image.width / image.height;
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        let imgWidth = canvasWidth;
+        let imgHeight = canvasWidth / aspectRatio;
 
-        // Draw the certificate image on the canvas
-        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        // Adjust the image height to fit if it's too tall
+        if (imgHeight > canvasHeight) {
+          imgHeight = canvasHeight;
+          imgWidth = canvasHeight * aspectRatio;
+        }
+
+        // Draw the certificate image on the canvas, adjusted to fit the canvas size
+        ctx.drawImage(
+          image,
+          (canvasWidth - imgWidth) / 2,
+          (canvasHeight - imgHeight) / 2,
+          imgWidth,
+          imgHeight
+        );
 
         // Define the starting position for the first line of text
         let startY = canvas.height / 2 - 20; // Starting position for participant_name
 
         // Participant's name
-        ctx.font = " 76px Arial";
+        ctx.font = "76px Arial";
         ctx.fillStyle = "#000";
         ctx.textAlign = "left";
         ctx.fillText(maindata.participant_name, 400, startY);
-        // text
 
         // Increment the y-position for the next line
         startY += 200;
@@ -150,47 +345,37 @@ export default function Participant() {
         ctx.font = "bold 50px Arial";
         ctx.fillStyle = "#9f3332";
         let eventNameX = 230;
-        const eventNameWords = maindata.event_name.split(" "); // Split the event name into words
+        const eventNameWords = maindata.event_name.split(" ");
         eventNameWords.forEach((word) => {
-          ctx.fillText(word, eventNameX, startY); // Draw each word
-          eventNameX += ctx.measureText(word).width + 20; // Add spacing between words (20px)
+          ctx.fillText(word, eventNameX, startY);
+          eventNameX += ctx.measureText(word).width + 20;
         });
 
-        // // Event name
-        // ctx.font = "bold 50px Arial";
-        // ctx.fillStyle = "#9f3332";
-        // ctx.fillText(maindata.event_name, 230, startY);
-
-        // Increment the y-position for the next line
         startY += 200;
 
         // Fixed text: Lahore Tax Bar Association
-        ctx.font = "bold 50px Arial"; // Individual font size
-        ctx.fillStyle = "#0ca95d"; // Color for fixed text
+        ctx.font = "bold 50px Arial";
+        ctx.fillStyle = "#0ca95d";
         ctx.fillText("Lahore Tax Bar Association", 510, startY);
 
-        // Move the starting position 300px below the fixed text
         startY += 130;
 
         // Base positions for date text
-        let startX = 510; // Starting X position
-
-        // Set font for the date text
-        ctx.font = " 40px Arial";
+        let startX = 510;
+        ctx.font = "40px Arial";
         ctx.fillStyle = "#000";
         ctx.textAlign = "left";
 
         // Draw day
         ctx.fillText(`${day},`, startX, startY);
 
-        // Measure and increment X position
         startX += ctx.measureText(`${day}, `).width;
 
         // Draw date
         ctx.fillText(`${date}`, startX, startY);
 
-        // Adjust for suffix position (slightly above the main text)
-        ctx.font = "20px Arial"; // Smaller font for the suffix
+        // Adjust for suffix position
+        ctx.font = "20px Arial";
         ctx.fillText(
           suffix,
           startX + ctx.measureText(`${date}`).width + 25,
@@ -198,23 +383,23 @@ export default function Participant() {
         );
 
         // Reset font and increment X for "of"
-        ctx.font = " 40px Arial";
+        ctx.font = "40px Arial";
         startX += ctx.measureText(`${date}${suffix}`).width - 20;
 
         // Draw "of Month"
         ctx.fillText(` of ${month},`, startX, startY);
 
-        // Increment X for year
         startX += ctx.measureText(` of ${month}, `).width;
 
         // Draw year
         ctx.fillText(`${year}`, startX, startY);
 
         startY += 330;
-        ctx.font = " 20px Arial";
+        ctx.font = "20px Arial";
         ctx.fillStyle = "#ffffff";
         ctx.textAlign = "left";
         ctx.fillText(text, 2180, startY);
+
         // Step 4: Generate the QR code image for the bottom-right corner
         const qrCodeDataURL = await generateQRCodeImage(
           maindata.id,
@@ -226,9 +411,8 @@ export default function Participant() {
         qrImage.src = qrCodeDataURL;
         qrImage.onload = () => {
           const qrSize = 200;
-          // Size of the QR code
-          const xPosition = canvas.width - qrSize - 200; // Position from the right
-          const yPosition = canvas.height - qrSize - 100; // Position from the bottom
+          const xPosition = canvas.width - qrSize - 200;
+          const yPosition = canvas.height - qrSize - 100;
           ctx.drawImage(qrImage, xPosition, yPosition, qrSize, qrSize);
 
           // Create the PDF with the certificate and QR code
@@ -261,8 +445,6 @@ export default function Participant() {
       setLoading(null); // End loading in case of error
     }
   };
-
-  // Email Certificate
   const handleEmailCertificate = async (id) => {
     setIsLoading(id);
     try {
@@ -301,14 +483,18 @@ export default function Participant() {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
+      // Set the canvas size to 2560x1810
+      canvas.width = 2560;
+      canvas.height = 1810;
+
+      // Create a new image object and load the image
       const image = new window.Image();
       image.src = imgBase64;
 
       // Wait for the image to load
       await new Promise((resolve) => (image.onload = resolve));
-      canvas.width = image.width;
-      canvas.height = image.height;
 
+      // Draw the certificate image on the canvas with the correct size
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
       let startY = canvas.height / 2 - 20; // Starting position for participant_name
@@ -426,6 +612,357 @@ export default function Participant() {
     }
   };
 
+  // const handlePrintCertificate = async (id) => {
+  //   try {
+  //     setLoading(id); // Start loading
+
+  //     // Step 1: Fetch participant data
+  //     const res = await fetch(
+  //       `http://51.112.24.26:5001/api/participant/getOne/${id}`
+  //     );
+  //     const fetchdata = await res.json();
+  //     const maindata = fetchdata.data;
+
+  //     console.log("Fetched Data:", maindata);
+
+  //     const eventDate = new Date(maindata.event_from_date);
+  //     const day = eventDate.toLocaleDateString("en-US", { weekday: "long" });
+  //     const month = eventDate.toLocaleDateString("en-US", { month: "long" });
+  //     const date = eventDate.getDate();
+  //     const year = eventDate.getFullYear();
+  //     const shortYear = year.toString().slice(-2);
+
+  //     // Determine the ordinal suffix
+  //     const suffix = (() => {
+  //       if (date % 10 === 1 && date !== 11) return "st";
+  //       if (date % 10 === 2 && date !== 12) return "nd";
+  //       if (date % 10 === 3 && date !== 13) return "rd";
+  //       return "th";
+  //     })();
+  //     const formattedId = String(id).padStart(6, "0"); // Format ID as 000001
+  //     const text = `LTBA-${formattedId}-${shortYear}`;
+
+  //     // Step 2: Load the certificate image
+  //     const imgUrl = `http://51.112.24.26:5001/${maindata.event_certificate_file_path}`;
+  //     const img = await fetch(imgUrl);
+  //     const blob = await img.blob();
+  //     const imgBase64 = await blobToBase64(blob);
+
+  //     // Step 3: Create a canvas and draw the certificate image
+  //     const canvas = document.createElement("canvas");
+  //     const ctx = canvas.getContext("2d");
+
+  //     const image = new window.Image();
+  //     image.src = imgBase64;
+
+  //     // Wait for the image to load
+  //     image.onload = async () => {
+  //       // Calculate the scaling factor to ensure the image fits within the canvas
+  //       const maxWidth = 2000; // Maximum canvas width
+  //       const maxHeight = 1500; // Maximum canvas height
+  //       const aspectRatio = image.width / image.height;
+
+  //       let newWidth = image.width;
+  //       let newHeight = image.height;
+
+  //       if (newWidth > maxWidth) {
+  //         newWidth = maxWidth;
+  //         newHeight = newWidth / aspectRatio;
+  //       }
+
+  //       if (newHeight > maxHeight) {
+  //         newHeight = maxHeight;
+  //         newWidth = newHeight * aspectRatio;
+  //       }
+
+  //       // Set canvas size to the new scaled image size
+  //       canvas.width = newWidth;
+  //       canvas.height = newHeight;
+
+  //       // Draw the scaled image on the canvas
+  //       ctx.drawImage(image, 0, 0, newWidth, newHeight);
+
+  //       // Define the starting position for the first line of text
+  //       let startY = newHeight / 2 - 20; // Adjust based on image size
+
+  //       // Participant's name
+  //       ctx.font = "76px Arial";
+  //       ctx.fillStyle = "#000";
+  //       ctx.textAlign = "left";
+  //       ctx.fillText(maindata.participant_name, 400, startY);
+
+  //       // Event name with word spacing
+  //       startY += 200;
+  //       ctx.font = "bold 50px Arial";
+  //       ctx.fillStyle = "#9f3332";
+  //       let eventNameX = 230;
+  //       const eventNameWords = maindata.event_name.split(" ");
+  //       eventNameWords.forEach((word) => {
+  //         ctx.fillText(word, eventNameX, startY);
+  //         eventNameX += ctx.measureText(word).width + 20;
+  //       });
+
+  //       startY += 200;
+
+  //       // Fixed text: Lahore Tax Bar Association
+  //       ctx.font = "bold 50px Arial";
+  //       ctx.fillStyle = "#0ca95d";
+  //       ctx.fillText("Lahore Tax Bar Association", 510, startY);
+
+  //       startY += 130;
+
+  //       // Base positions for date text
+  //       let startX = 510;
+  //       ctx.font = "40px Arial";
+  //       ctx.fillStyle = "#000";
+  //       ctx.textAlign = "left";
+
+  //       // Draw day
+  //       ctx.fillText(`${day},`, startX, startY);
+
+  //       // Measure and increment X position
+  //       startX += ctx.measureText(`${day}, `).width;
+
+  //       // Draw date
+  //       ctx.fillText(`${date}`, startX, startY);
+
+  //       // Adjust for suffix position (slightly above the main text)
+  //       ctx.font = "20px Arial";
+  //       ctx.fillText(
+  //         suffix,
+  //         startX + ctx.measureText(`${date}`).width + 25,
+  //         startY - 10
+  //       );
+
+  //       // Reset font and increment X for "of"
+  //       ctx.font = "40px Arial";
+  //       startX += ctx.measureText(`${date}${suffix}`).width - 20;
+
+  //       // Draw "of Month"
+  //       ctx.fillText(` of ${month},`, startX, startY);
+
+  //       // Increment X for year
+  //       startX += ctx.measureText(` of ${month}, `).width;
+
+  //       // Draw year
+  //       ctx.fillText(`${year}`, startX, startY);
+
+  //       startY += 330;
+  //       ctx.font = "20px Arial";
+  //       ctx.fillStyle = "#ffffff";
+  //       ctx.textAlign = "left";
+  //       ctx.fillText(text, 2180, startY);
+
+  //       // Step 4: Generate the QR code image for the bottom-right corner
+  //       const qrCodeDataURL = await generateQRCodeImage(
+  //         maindata.id,
+  //         maindata.participant_name
+  //       );
+
+  //       // Step 5: Draw the QR code onto the canvas
+  //       const qrImage = new window.Image();
+  //       qrImage.src = qrCodeDataURL;
+  //       qrImage.onload = () => {
+  //         const qrSize = 200;
+  //         const xPosition = canvas.width - qrSize - 200;
+  //         const yPosition = canvas.height - qrSize - 100;
+  //         ctx.drawImage(qrImage, xPosition, yPosition, qrSize, qrSize);
+
+  //         // Create the PDF with the certificate and QR code
+  //         const updatedImgBase64 = canvas.toDataURL("image/png");
+
+  //         // Generate the PDF using jsPDF
+  //         const pdf = new jsPDF({
+  //           orientation: "landscape",
+  //           unit: "px",
+  //           format: [canvas.width, canvas.height],
+  //         });
+
+  //         pdf.addImage(
+  //           updatedImgBase64,
+  //           "PNG",
+  //           0,
+  //           0,
+  //           canvas.width,
+  //           canvas.height
+  //         );
+
+  //         // Save the PDF locally or process further
+  //         pdf.save(`${maindata.participant_name}-Certificate.pdf`);
+  //         setLoading(null); // End loading
+  //       };
+  //     };
+  //   } catch (error) {
+  //     console.error("Error occurred while processing the certificate:", error);
+  //     alert("An error occurred while processing the certificate.");
+  //     setLoading(null); // End loading in case of error
+  //   }
+  // };
+
+  // Email Certificate
+  // const handleEmailCertificate = async (id) => {
+  //   setIsLoading(id);
+  //   try {
+  //     // Step 1: Fetch participant data
+  //     const res = await fetch(
+  //       `http://51.112.24.26:5001/api/participant/getOne/${id}`
+  //     );
+  //     const fetchdata = await res.json();
+  //     const maindata = fetchdata.data;
+
+  //     console.log("Fetched Data:", maindata);
+
+  //     const eventDate = new Date(maindata.event_from_date);
+  //     const day = eventDate.toLocaleDateString("en-US", { weekday: "long" });
+  //     const month = eventDate.toLocaleDateString("en-US", { month: "long" });
+  //     const date = eventDate.getDate();
+  //     const year = eventDate.getFullYear();
+  //     const shortYear = year.toString().slice(-2);
+
+  //     const suffix = (() => {
+  //       if (date % 10 === 1 && date !== 11) return "st";
+  //       if (date % 10 === 2 && date !== 12) return "nd";
+  //       if (date % 10 === 3 && date !== 13) return "rd";
+  //       return "th";
+  //     })();
+  //     const formattedId = String(id).padStart(6, "0"); // Format ID as 000001
+  //     const text = `LTBA-${formattedId}-${shortYear}`;
+
+  //     // Step 2: Load the certificate image
+  //     const imgUrl = `http://51.112.24.26:5001/${maindata.event_certificate_file_path}`;
+  //     const img = await fetch(imgUrl);
+  //     const blob = await img.blob();
+  //     const imgBase64 = await blobToBase64(blob);
+
+  //     // Step 3: Create a canvas and draw the certificate image
+  //     const canvas = document.createElement("canvas");
+  //     const ctx = canvas.getContext("2d");
+
+  //     const image = new window.Image();
+  //     image.src = imgBase64;
+
+  //     // Wait for the image to load
+  //     await new Promise((resolve) => (image.onload = resolve));
+  //     canvas.width = image.width;
+  //     canvas.height = image.height;
+
+  //     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  //     let startY = canvas.height / 2 - 20; // Starting position for participant_name
+
+  //     // Participant's name
+  //     ctx.font = "76px Arial";
+  //     ctx.fillStyle = "#000";
+  //     ctx.textAlign = "left";
+  //     ctx.fillText(maindata.participant_name, 400, startY);
+
+  //     startY += 200;
+  //     // Event name with word spacing
+  //     ctx.font = "bold 50px Arial";
+  //     ctx.fillStyle = "#9f3332";
+  //     let eventNameX = 230;
+  //     const eventNameWords = maindata.event_name.split(" ");
+  //     eventNameWords.forEach((word) => {
+  //       ctx.fillText(word, eventNameX, startY);
+  //       eventNameX += ctx.measureText(word).width + 20;
+  //     });
+
+  //     startY += 200;
+  //     // Fixed text
+  //     ctx.font = "bold 50px Arial";
+  //     ctx.fillStyle = "#0ca95d";
+  //     ctx.fillText("Lahore Tax Bar Association", 510, startY);
+
+  //     startY += 130;
+
+  //     let startX = 510;
+  //     ctx.font = "40px Arial";
+  //     ctx.fillStyle = "#000";
+  //     ctx.textAlign = "left";
+  //     ctx.fillText(`${day},`, startX, startY);
+  //     startX += ctx.measureText(`${day}, `).width;
+  //     ctx.fillText(`${date}`, startX, startY);
+  //     ctx.font = "20px Arial";
+  //     ctx.fillText(
+  //       suffix,
+  //       startX + ctx.measureText(`${date}`).width + 25,
+  //       startY - 10
+  //     );
+  //     ctx.font = "40px Arial";
+  //     startX += ctx.measureText(`${date}${suffix}`).width - 20;
+  //     ctx.fillText(` of ${month},`, startX, startY);
+  //     startX += ctx.measureText(` of ${month}, `).width;
+  //     ctx.fillText(`${year}`, startX, startY);
+
+  //     startY += 330;
+  //     ctx.font = "20px Arial";
+  //     ctx.fillStyle = "#ffffff";
+  //     ctx.fillText(text, 2180, startY);
+
+  //     // Generate QR code and add to the canvas
+  //     const qrCodeDataURL = await generateQRCodeImage(
+  //       maindata.id,
+  //       maindata.participant_name
+  //     );
+
+  //     const qrImage = new window.Image();
+  //     qrImage.src = qrCodeDataURL;
+  //     await new Promise((resolve) => (qrImage.onload = resolve));
+
+  //     const qrSize = 200;
+  //     const xPosition = canvas.width - qrSize - 200;
+  //     const yPosition = canvas.height - qrSize - 100;
+  //     ctx.drawImage(qrImage, xPosition, yPosition, qrSize, qrSize);
+
+  //     // Step 4: Convert the canvas to a data URL
+  //     const updatedImgBase64 = canvas.toDataURL("image/png");
+
+  //     // Step 5: Generate the PDF using jsPDF
+  //     const pdf = new jsPDF({
+  //       orientation: "landscape",
+  //       unit: "px",
+  //       format: [canvas.width, canvas.height],
+  //     });
+
+  //     pdf.addImage(updatedImgBase64, "PNG", 0, 0, canvas.width, canvas.height);
+
+  //     const pdfBlob = pdf.output("blob");
+
+  //     // Step 6: Send the PDF to the backend
+  //     const formData = new FormData();
+  //     formData.append(
+  //       "pdf",
+  //       pdfBlob,
+  //       `${maindata.participant_name}-Certificate.pdf`
+  //     );
+  //     formData.append("participant_email", maindata.participant_email);
+  //     formData.append("participant_name", maindata.participant_name);
+  //     formData.append("event_name", maindata.event_name);
+
+  //     const emailRes = await fetch(
+  //       "http://51.112.24.26:5001/api/email/sendEmail",
+  //       {
+  //         method: "POST",
+  //         body: formData,
+  //       }
+  //     );
+
+  //     const emailResult = await emailRes.json();
+
+  //     if (emailRes.ok) {
+  //       alert("Certificate emailed successfully!");
+  //     } else {
+  //       console.error(emailResult.message);
+  //       alert("Failed to send the certificate email.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error occurred:", error);
+  //     alert("An error occurred while processing the request.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   // Helper function to convert Blob to Base64
   const blobToBase64 = (blob) => {
     return new Promise((resolve, reject) => {
@@ -537,10 +1074,6 @@ export default function Participant() {
                     alt="Participant Picture"
                     width={50}
                     height={50}
-                    style={{
-                      border: "2px solid",
-                      objectFit: "contain",
-                    }}
                   />
                 </td>
 

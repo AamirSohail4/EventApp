@@ -1,6 +1,8 @@
 "use client";
 
 import { useAppContext } from "@/context/AppContext";
+import axios from "axios";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -21,6 +23,8 @@ export default function AddEvent() {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [errors, setErrors] = useState({});
+  const [certificatePreview, setCertificatePreview] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(null);
 
   useEffect(() => {
     if (roleId == 2) {
@@ -66,20 +70,86 @@ export default function AddEvent() {
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked, files } = e.target;
+    const { name, value } = e.target; // Also get the value of the input
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox" ? checked : type === "file" ? files[0] : value,
+      [name]: value, // Update the state with the new value for the corresponding field
     }));
+  };
+
+  const handleCertificateChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        // Create a new image instance only on the client side
+        if (typeof window !== "undefined") {
+          const img = new window.Image();
+          img.src = e.target.result;
+
+          img.onload = () => {
+            if (img.width === 2560 && img.height === 1810) {
+              // If dimensions are valid
+              setFormData({ ...formData, event_certificate_file_path: file });
+              setCertificatePreview(reader.result); // Set the preview URL for the certificate
+            } else {
+              // If dimensions are invalid
+              alert("Image dimensions must be 2560x1810.");
+              event.target.value = ""; // Reset the file input
+              setCertificatePreview(null); // Clear the preview
+            }
+          };
+        }
+      };
+
+      reader.readAsDataURL(file); // Read the file as a data URL
+    } else {
+      setCertificatePreview(null); // Clear the preview if no file is selected
+    }
+  };
+
+  // const handleCertificateChange = async (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+
+  //     const img = new Image();
+  //     const fileReader = new FileReader();
+
+  //     fileReader.onload = (event) => {
+  //       img.src = event.target.result;
+  //     };
+
+  //     img.onload = () => {
+  //       if (img.width === 2560 && img.height === 1810) {
+  //         setCertificatePreview(URL.createObjectURL(file));
+  //       } else {
+  //         alert("Image dimensions must be 2560x1810.");
+  //         e.target.value = ""; // Reset file input
+  //         setCertificatePreview(null);
+  //       }
+  //     };
+
+  //     fileReader.readAsDataURL(file);
+  //   }
+  // };
+
+  const handleBannerChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setFormData({ ...formData, event_banner_file_path: file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBannerPreview(reader.result); // Set the preview URL for the banner
+      };
+      reader.readAsDataURL(file); // Read the file as a data URL
+    } else {
+      setBannerPreview(null); // Clear the preview if no file is selected
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
 
     setIsSubmitting(true);
 
@@ -107,6 +177,7 @@ export default function AddEvent() {
       data.append("user_id", userId);
       data.append("is_active", formData.is_active ? 1 : 0);
 
+      // Append files if they exist
       if (formData.event_certificate_file_path) {
         data.append(
           "event_certificate_file_path",
@@ -118,36 +189,28 @@ export default function AddEvent() {
         data.append("event_banner_file_path", formData.event_banner_file_path);
       }
 
-      const response = await fetch(
+      // Submit the form
+      const response = await axios.post(
         "http://51.112.24.26:5001/api/event/addNew",
-        {
-          method: "POST",
-          body: data,
-        }
+        data
       );
 
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        if (responseData.message === "Event with this name already exists.") {
-          alert(responseData.message);
-          return;
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (response.status === 201) {
+        alert("Event added successfully.");
+        eventDisplay();
+        eventParticipantDisplay();
+        eventParticipantSummary();
+        router.push("/dashboard/event");
+      } else {
+        throw new Error(response.data.message || "Unexpected error occurred.");
       }
-
-      alert("Event added successfully.");
-      eventDisplay();
-      eventParticipantDisplay();
-      eventParticipantSummary();
-      router.push("/dashboard/event");
     } catch (error) {
       console.error("Failed to submit Event data:", error);
+      alert(error.message || "Something went wrong. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const handleCancel = () => {
     router.push("/dashboard/event");
   };
@@ -159,7 +222,7 @@ export default function AddEvent() {
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label htmlFor="event_name" className="form-label">
-            Event Name <span style={{ color: "red" }}>*</span>
+            Event Name <span className="stars_color">*</span>
           </label>
           <input
             type="text"
@@ -171,14 +234,11 @@ export default function AddEvent() {
             onChange={handleChange}
             required
           />
-          {/* {errors.event_name && (
-            <p style={{ color: "red" }}>{errors.event_name}</p>
-          )} */}
         </div>
 
         <div className="mb-3">
           <label htmlFor="event_from_date" className="form-label">
-            Event Start Date <span style={{ color: "red" }}>*</span>
+            Event Start Date <span className="stars_color">*</span>
           </label>
           <DatePicker
             selected={fromDate}
@@ -194,7 +254,7 @@ export default function AddEvent() {
 
         <div className="mb-3">
           <label htmlFor="event_to_date" className="form-label">
-            Event End Date <span style={{ color: "red" }}>*</span>
+            Event End Date <span className="stars_color">*</span>
           </label>
           <DatePicker
             selected={toDate}
@@ -210,7 +270,7 @@ export default function AddEvent() {
 
         <div className="mb-3">
           <label htmlFor="event_location" className="form-label">
-            Event Place <span style={{ color: "red" }}>*</span>
+            Event Place <span className="stars_color">*</span>
           </label>
           <input
             type="text"
@@ -223,11 +283,9 @@ export default function AddEvent() {
             required
             maxLength={60}
           />
-          {errors.event_location && (
-            <p style={{ color: "red" }}>{errors.event_location}</p>
-          )}
         </div>
 
+        {/* Event Certificate */}
         <div className="mb-3">
           <label htmlFor="event_certificate_file_path" className="form-label">
             Event Certificate (Picture)
@@ -238,10 +296,21 @@ export default function AddEvent() {
             name="event_certificate_file_path"
             className="form-control"
             accept="image/*"
-            onChange={handleChange}
+            onChange={handleCertificateChange}
           />
+          {certificatePreview && (
+            <div style={{ marginTop: "10px" }}>
+              <Image
+                src={certificatePreview}
+                alt="Event Certificate"
+                width={50}
+                height={50}
+              />
+            </div>
+          )}
         </div>
 
+        {/* Event Banner */}
         <div className="mb-3">
           <label htmlFor="event_banner_file_path" className="form-label">
             Event Banner (Optional)
@@ -252,8 +321,18 @@ export default function AddEvent() {
             name="event_banner_file_path"
             className="form-control"
             accept="image/*"
-            onChange={handleChange}
+            onChange={handleBannerChange}
           />
+          {bannerPreview && (
+            <div style={{ marginTop: "10px" }}>
+              <Image
+                src={bannerPreview}
+                alt="Event Banner"
+                width={50}
+                height={50}
+              />
+            </div>
+          )}
         </div>
 
         <div className="mb-3 form-check form-switch">

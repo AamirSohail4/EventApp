@@ -26,7 +26,7 @@ export function Sidebar() {
           <Image
             src="/images/logo.jpg"
             alt="Logo"
-            className="sidebar-logo"
+            // className="sidebar-logo"
             width={150} // Specify the width
             height={50} // Specify the height
           />
@@ -68,7 +68,6 @@ export function Sidebar() {
               href="#"
               className={`nav-link ${isReportsOpen ? "active" : ""}`}
               onClick={toggleReports}
-              style={{ cursor: "pointer" }}
             >
               Reports
               <span className="dropdown-icon">{isReportsOpen ? "▲" : "▼"}</span>

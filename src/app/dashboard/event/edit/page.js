@@ -4,8 +4,10 @@ import { useAppContext } from "@/context/AppContext";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DatePicker from "react-datepicker";
+import axios from "axios";
 import "react-datepicker/dist/react-datepicker.css";
 import Image from "next/image";
+import NextImage from "next/image";
 
 function EditEventContent() {
   const {
@@ -33,12 +35,7 @@ function EditEventContent() {
     is_active: false,
     event_id: "",
   });
-  console.log("That is a page", page);
-  // useEffect(() => {
-  //   if (roleId !== 2) {
-  //     router.push("/auth/login");
-  //   }
-  // }, [roleId, router]);
+
   useEffect(() => {
     const fetchEvent = async () => {
       const res = await fetch(
@@ -86,9 +83,82 @@ function EditEventContent() {
   const handleToDateChange = (date) => {
     setToDate(date); // Update toDate state when date changes
   };
+  const handleImageChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      const file = files[0];
+      const reader = new FileReader();
 
+      reader.onload = (event) => {
+        const img = new window.Image(); // Explicitly use the global Image constructor
+        img.src = event.target.result;
+
+        img.onload = () => {
+          const { width, height } = img;
+
+          if (width === 2560 && height === 1810) {
+            // Valid image dimensions
+            setFormData((prevFormData) => ({
+              ...prevFormData,
+              [name]: file,
+            }));
+          } else {
+            alert(
+              "Invalid image dimensions. Please upload an image with 2560x1810 dimensions."
+            );
+          }
+        };
+      };
+
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const data = new FormData();
+  //   data.append("event_name", formData.event_name);
+  //   const formattedfromDate = fromDate
+  //     ? `${fromDate.getFullYear()}-${String(fromDate.getMonth() + 1).padStart(
+  //         2,
+  //         "0"
+  //       )}-${String(fromDate.getDate()).padStart(2, "0")}`
+  //     : "";
+  //   data.append("event_from_date", formattedfromDate);
+  //   const formattedtoDate = toDate
+  //     ? `${toDate.getFullYear()}-${String(toDate.getMonth() + 1).padStart(
+  //         2,
+  //         "0"
+  //       )}-${String(toDate.getDate()).padStart(2, "0")}`
+  //     : "";
+  //   data.append("event_to_date", formattedtoDate);
+  //   data.append("event_location", formData.event_location);
+  //   data.append(
+  //     "event_certificate_file_path",
+  //     formData.event_certificate_file_path
+  //   );
+  //   data.append("event_banner_file_path", formData.event_banner_file_path);
+  //   data.append("is_active", formData.is_active ? 1 : 0);
+  //   data.append("event_id", formData.event_id);
+
+  //   const res = await axios(`http://51.112.24.26:5001/api/event/edit/${id}`, {
+  //     method: "PATCH",
+  //     body: data,
+  //   });
+
+  //   if (res.ok) {
+  //     alert("Update Succussfully");
+  //     eventDisplay();
+  //     eventParticipantDisplay();
+  //     eventParticipantSummary();
+  //     router.push(`/dashboard/event?page=${page}`);
+  //   } else {
+  //     alert("Error updating the event");
+  //   }
+  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const data = new FormData();
     data.append("event_name", formData.event_name);
     const formattedfromDate = fromDate
@@ -98,6 +168,7 @@ function EditEventContent() {
         )}-${String(fromDate.getDate()).padStart(2, "0")}`
       : "";
     data.append("event_from_date", formattedfromDate);
+
     const formattedtoDate = toDate
       ? `${toDate.getFullYear()}-${String(toDate.getMonth() + 1).padStart(
           2,
@@ -105,6 +176,7 @@ function EditEventContent() {
         )}-${String(toDate.getDate()).padStart(2, "0")}`
       : "";
     data.append("event_to_date", formattedtoDate);
+
     data.append("event_location", formData.event_location);
     data.append(
       "event_certificate_file_path",
@@ -114,18 +186,32 @@ function EditEventContent() {
     data.append("is_active", formData.is_active ? 1 : 0);
     data.append("event_id", formData.event_id);
 
-    const res = await fetch(`http://51.112.24.26:5001/api/event/edit/${id}`, {
-      method: "PATCH",
-      body: data,
-    });
+    try {
+      const res = await axios.patch(
+        `http://51.112.24.26:5001/api/event/edit/${id}`,
+        data
+      );
 
-    if (res.ok) {
-      eventDisplay();
-      eventParticipantDisplay();
-      eventParticipantSummary();
-      router.push(`/dashboard/event?page=${page}`);
-    } else {
-      alert("Error updating the event");
+      if (res.data.success) {
+        alert("Updated successfully");
+        eventDisplay();
+        eventParticipantDisplay();
+        eventParticipantSummary();
+        router.push(`/dashboard/event?page=${page}`);
+      } else {
+        alert(res.data.message || "Error updating the event");
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        alert(error.response.data.message); // Show custom error message from backend
+      } else {
+        console.error("Error while updating event:", error);
+        alert("An error occurred while updating the event");
+      }
     }
   };
 
@@ -143,7 +229,7 @@ function EditEventContent() {
           {/* Event Name */}
           <div className="mb-3">
             <label htmlFor="event_name" className="form-label">
-              Event Name<span style={{ color: "red" }}>*</span>
+              Event Name<span className="stars_color">*</span>
             </label>
             <input
               type="text"
@@ -160,7 +246,7 @@ function EditEventContent() {
           {/* Event From Date */}
           <div className="mb-3">
             <label htmlFor="event_from_date" className="form-label">
-              Event Start Date <span style={{ color: "red" }}>*</span>
+              Event Start Date <span className="stars_color">*</span>
             </label>
             <DatePicker
               selected={fromDate}
@@ -176,7 +262,7 @@ function EditEventContent() {
           {/* Event To Date */}
           <div className="mb-3">
             <label htmlFor="event_to_date" className="form-label">
-              Event End Date <span style={{ color: "red" }}>*</span>
+              Event End Date <span className="stars_color">*</span>
             </label>
             <DatePicker
               selected={toDate}
@@ -207,7 +293,7 @@ function EditEventContent() {
           </div>
 
           {/* Event Certificate */}
-          <div className="mb-3">
+          {/* <div className="mb-3">
             <label htmlFor="event_certificate_file_path" className="form-label">
               Event Certificate (Picture)
             </label>
@@ -229,11 +315,36 @@ function EditEventContent() {
                 alt="Event Certificate"
                 width={50}
                 height={50}
-                style={{ border: "2px solid" }}
+                // style={{ border: "2px solid" }}
+              />
+            </div>
+          </div> */}
+
+          <div className="mb-3">
+            <label htmlFor="event_certificate_file_path" className="form-label">
+              Event Certificate (Picture)
+            </label>
+            <input
+              type="file"
+              id="event_certificate_file_path"
+              name="event_certificate_file_path"
+              className="form-control"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+            <div className="mt-3">
+              <Image
+                src={
+                  formData.event_certificate_file_path
+                    ? `http://51.112.24.26:5001/${formData.event_certificate_file_path}`
+                    : "/images/product.jpg"
+                }
+                alt="Event Certificate"
+                width={50}
+                height={50}
               />
             </div>
           </div>
-
           {/* Event Banner */}
           <div className="mb-3">
             <label htmlFor="event_banner_file_path" className="form-label">
@@ -248,7 +359,7 @@ function EditEventContent() {
               onChange={handleChange}
             />
             <div className="mt-3">
-              <Image
+              <NextImage
                 src={
                   formData.event_banner_file_path
                     ? `http://51.112.24.26:5001/${formData.event_banner_file_path}`
@@ -257,7 +368,7 @@ function EditEventContent() {
                 alt="Event Banner"
                 width={50}
                 height={50}
-                style={{ border: "2px solid" }}
+                // style={{ border: "2px solid" }}
               />
             </div>
           </div>

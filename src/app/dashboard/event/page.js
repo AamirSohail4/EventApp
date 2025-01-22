@@ -130,10 +130,10 @@ export default function Event() {
                     alt="Event Certificate"
                     width={50}
                     height={50}
-                    style={{
-                      border: "2px solid",
-                      objectFit: "contain",
-                    }}
+                    // style={{
+                    //   border: "2px solid",
+                    //   objectFit: "contain",
+                    // }}
                   />
                 </td>
                 <td style={{ textAlign: "center", verticalAlign: "middle" }}>
@@ -146,10 +146,10 @@ export default function Event() {
                     alt="Event Banner"
                     width={50}
                     height={50}
-                    style={{
-                      border: "2px solid",
-                      objectFit: "contain",
-                    }}
+                    // style={{
+                    //   border: "2px solid",
+                    //   objectFit: "contain",
+                    // }}
                   />
                 </td>
                 <td style={{ textAlign: "center", verticalAlign: "middle" }}>
@@ -169,14 +169,10 @@ export default function Event() {
                   <Link
                     href={`/dashboard/event/edit?id=${event.id}&page=${currentPage}`}
                   >
-                    <FaEdit
-                      className="text-primary me-3"
-                      style={{ cursor: "pointer" }}
-                    />
+                    <FaEdit className="text-primary me-3" />
                   </Link>
                   <FaTrashAlt
                     className="text-danger"
-                    style={{ cursor: "pointer" }}
                     onClick={() => handleDelete(event.id)}
                   />
                 </td>

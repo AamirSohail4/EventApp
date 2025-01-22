@@ -178,7 +178,7 @@ function EditParticipantContent() {
         {/* Registration Date */}
         <div className="mb-3">
           <label htmlFor="registration_date" className="form-label">
-            Registration Date <span style={{ color: "red" }}>*</span>
+            Registration Date <span className="stars_color">*</span>
           </label>
           <DatePicker
             selected={registration_date}

@@ -27,6 +27,7 @@ export default function AddParticipant() {
   const [registration_date, setRegistrationDate] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isloading, setIsLoading] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({
     event_id: "",
     participant_name: "",
@@ -221,7 +222,6 @@ export default function AddParticipant() {
       setIsSubmitting(false);
     }
   };
-
   const handleEmailCertificate = async (id) => {
     setIsLoading(id);
     try {
@@ -256,18 +256,21 @@ export default function AddParticipant() {
       const blob = await img.blob();
       const imgBase64 = await blobToBase64(blob);
 
-      // Step 3: Create a canvas and draw the certificate image
+      // Step 3: Create a canvas and set its size to 2560x1810
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
+
+      // Set canvas size to 2560x1810
+      canvas.width = 2560;
+      canvas.height = 1810;
 
       const image = new window.Image();
       image.src = imgBase64;
 
       // Wait for the image to load
       await new Promise((resolve) => (image.onload = resolve));
-      canvas.width = image.width;
-      canvas.height = image.height;
 
+      // Scale the certificate image to fit the canvas
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
       let startY = canvas.height / 2 - 20; // Starting position for participant_name
@@ -389,6 +392,174 @@ export default function AddParticipant() {
     }
   };
 
+  // const handleEmailCertificate = async (id) => {
+  //   setIsLoading(id);
+  //   try {
+  //     // Step 1: Fetch participant data
+  //     const res = await fetch(
+  //       `http://51.112.24.26:5001/api/participant/getOne/${id}`
+  //     );
+  //     const fetchdata = await res.json();
+  //     const maindata = fetchdata.data;
+
+  //     console.log("Fetched Data:", maindata);
+
+  //     const eventDate = new Date(maindata.event_from_date);
+  //     const day = eventDate.toLocaleDateString("en-US", { weekday: "long" });
+  //     const month = eventDate.toLocaleDateString("en-US", { month: "long" });
+  //     const date = eventDate.getDate();
+  //     const year = eventDate.getFullYear();
+  //     const shortYear = year.toString().slice(-2);
+
+  //     const suffix = (() => {
+  //       if (date % 10 === 1 && date !== 11) return "st";
+  //       if (date % 10 === 2 && date !== 12) return "nd";
+  //       if (date % 10 === 3 && date !== 13) return "rd";
+  //       return "th";
+  //     })();
+  //     const formattedId = String(id).padStart(6, "0"); // Format ID as 000001
+  //     const text = `LTBA-${formattedId}-${shortYear}`;
+
+  //     // Step 2: Load the certificate image
+  //     const imgUrl = `http://51.112.24.26:5001/${maindata.event_certificate_file_path}`;
+  //     const img = await fetch(imgUrl);
+  //     const blob = await img.blob();
+  //     const imgBase64 = await blobToBase64(blob);
+
+  //     // Step 3: Create a canvas and draw the certificate image
+  //     const canvas = document.createElement("canvas");
+  //     const ctx = canvas.getContext("2d");
+  //     // Set the canvas size to 2560x1810
+
+  //     const image = new window.Image();
+  //     image.src = imgBase64;
+
+  //     // Wait for the image to load
+  //     await new Promise((resolve) => (image.onload = resolve));
+  //     canvas.width = image.width;
+  //     canvas.height = image.height;
+
+  //     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  //     let startY = canvas.height / 2 - 20; // Starting position for participant_name
+
+  //     // Participant's name
+  //     ctx.font = "76px Arial";
+  //     ctx.fillStyle = "#000";
+  //     ctx.textAlign = "left";
+  //     ctx.fillText(maindata.participant_name, 400, startY);
+
+  //     startY += 200;
+  //     // Event name with word spacing
+  //     ctx.font = "bold 50px Arial";
+  //     ctx.fillStyle = "#9f3332";
+  //     let eventNameX = 230;
+  //     const eventNameWords = maindata.event_name.split(" ");
+  //     eventNameWords.forEach((word) => {
+  //       ctx.fillText(word, eventNameX, startY);
+  //       eventNameX += ctx.measureText(word).width + 20;
+  //     });
+
+  //     startY += 200;
+  //     // Fixed text
+  //     ctx.font = "bold 50px Arial";
+  //     ctx.fillStyle = "#0ca95d";
+  //     ctx.fillText("Lahore Tax Bar Association", 510, startY);
+
+  //     startY += 130;
+
+  //     let startX = 510;
+  //     ctx.font = "40px Arial";
+  //     ctx.fillStyle = "#000";
+  //     ctx.textAlign = "left";
+  //     ctx.fillText(`${day},`, startX, startY);
+  //     startX += ctx.measureText(`${day}, `).width;
+  //     ctx.fillText(`${date}`, startX, startY);
+  //     ctx.font = "20px Arial";
+  //     ctx.fillText(
+  //       suffix,
+  //       startX + ctx.measureText(`${date}`).width + 25,
+  //       startY - 10
+  //     );
+  //     ctx.font = "40px Arial";
+  //     startX += ctx.measureText(`${date}${suffix}`).width - 20;
+  //     ctx.fillText(` of ${month},`, startX, startY);
+  //     startX += ctx.measureText(` of ${month}, `).width;
+  //     ctx.fillText(`${year}`, startX, startY);
+
+  //     startY += 330;
+  //     ctx.font = "20px Arial";
+  //     ctx.fillStyle = "#ffffff";
+  //     ctx.fillText(text, 2180, startY);
+
+  //     // Generate QR code and add to the canvas
+  //     const qrCodeDataURL = await generateQRCodeImage(
+  //       maindata.id,
+  //       maindata.participant_name
+  //     );
+
+  //     const qrImage = new window.Image();
+  //     qrImage.src = qrCodeDataURL;
+  //     await new Promise((resolve) => (qrImage.onload = resolve));
+
+  //     const qrSize = 200;
+  //     const xPosition = canvas.width - qrSize - 200;
+  //     const yPosition = canvas.height - qrSize - 100;
+  //     ctx.drawImage(qrImage, xPosition, yPosition, qrSize, qrSize);
+
+  //     // Step 4: Convert the canvas to a data URL
+  //     const updatedImgBase64 = canvas.toDataURL("image/png");
+
+  //     // Step 5: Generate the PDF using jsPDF
+  //     const pdf = new jsPDF({
+  //       orientation: "landscape",
+  //       unit: "px",
+  //       format: [canvas.width, canvas.height],
+  //     });
+
+  //     pdf.addImage(updatedImgBase64, "PNG", 0, 0, canvas.width, canvas.height);
+
+  //     const pdfBlob = pdf.output("blob");
+
+  //     // Step 6: Send the PDF to the backend
+  //     const formData = new FormData();
+  //     formData.append(
+  //       "pdf",
+  //       pdfBlob,
+  //       `${maindata.participant_name}-Certificate.pdf`
+  //     );
+  //     formData.append("participant_email", maindata.participant_email);
+  //     formData.append("participant_name", maindata.participant_name);
+  //     formData.append("event_name", maindata.event_name);
+
+  //     const emailRes = await fetch(
+  //       "http://51.112.24.26:5001/api/email/sendEmail",
+  //       {
+  //         method: "POST",
+  //         body: formData,
+  //       }
+  //     );
+
+  //     const emailResult = await emailRes.json();
+
+  //     if (emailRes.ok) {
+  //       alert("Certificate emailed successfully!");
+  //       displayParticipant();
+  //       eventParticipantDisplay();
+  //       eventParticipantSummary();
+  //       router.push("/dashboard/participant");
+  //     } else {
+  //       console.error(emailResult.message);
+  //       alert("Failed to send the certificate email.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error occurred:", error);
+  //     alert("An error occurred while processing the request.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   // Helper function to convert Blob to Base64
   const blobToBase64 = (blob) => {
     return new Promise((resolve, reject) => {
@@ -448,7 +619,13 @@ export default function AddParticipant() {
   const handleCancel = () => {
     router.push("/dashboard/participant");
   };
-
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, participant_picture_file_path: file });
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
   return (
     <div className="container mt-5">
       <h1 className="mb-4">Add New Participant</h1>
@@ -456,7 +633,7 @@ export default function AddParticipant() {
         {/* Event Name */}
         <div className="mb-3">
           <label htmlFor="event_id" className="form-label">
-            Event Name<span style={{ color: "red" }}>*</span>
+            Event Name<span className="stars_color">*</span>
           </label>
           <select
             className="form-select"
@@ -477,7 +654,7 @@ export default function AddParticipant() {
         {/* Registration Date */}
         <div className="mb-3">
           <label htmlFor="registration_date" className="form-label">
-            Registration Date<span style={{ color: "red" }}>*</span>
+            Registration Date<span className="stars_color">*</span>
           </label>
           <DatePicker
             selected={registration_date}
@@ -494,7 +671,7 @@ export default function AddParticipant() {
         {/* Participant Name */}
         <div className="mb-3">
           <label htmlFor="participant_name" className="form-label">
-            Name<span style={{ color: "red" }}>*</span>
+            Name<span className="stars_color">*</span>
           </label>
           <input
             type="text"
@@ -515,7 +692,7 @@ export default function AddParticipant() {
         {/* Phone Number */}
         <div className="mb-3">
           <label htmlFor="participant_phone_number" className="form-label">
-            Mobile Number<span style={{ color: "red" }}>*</span>
+            Mobile Number<span className="stars_color">*</span>
           </label>
           <input
             type="tel"
@@ -536,7 +713,7 @@ export default function AddParticipant() {
         {/* Email */}
         <div className="mb-3">
           <label htmlFor="participant_email" className="form-label">
-            Email<span style={{ color: "red" }}>*</span>
+            Email<span className="stars_color">*</span>
           </label>
           <input
             type="email"
@@ -565,8 +742,24 @@ export default function AddParticipant() {
             name="participant_picture_file_path"
             className="form-control"
             accept="image/*"
-            onChange={handleChange}
+            onChange={handleImageUpload}
           />
+          {imagePreview && (
+            <div style={{ marginTop: "10px" }}>
+              <Image
+                src={imagePreview}
+                alt="Selected"
+                width={150}
+                height={150}
+                style={{
+                  width: "150px",
+                  height: "150px",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Remarks */}
