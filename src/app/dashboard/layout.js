@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { Footer } from "@/components/Footer";
 import { AppProvider } from "@/context/AppContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata = {
   title: "Event",
@@ -16,13 +17,15 @@ export default function DashboardLayout({ children }) {
     <html lang="en">
       <body>
         <div className="container-fluid">
-          <Header />
-          <div className="d-flex">
-            <Sidebar />
-            <AppProvider>
-              <main className="main-content">{children}</main>
-            </AppProvider>
-          </div>
+          <AuthProvider>
+            <Header />
+            <div className="d-flex">
+              <Sidebar />
+              <AppProvider>
+                <main className="main-content">{children}</main>
+              </AppProvider>
+            </div>
+          </AuthProvider>
         </div>
       </body>
     </html>

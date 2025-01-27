@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { redirect, useRouter } from "next/navigation";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import Image from "next/image";
@@ -24,7 +24,13 @@ export default function Page() {
         type === "checkbox" ? checked : type === "file" ? files[0] : value,
     }));
   };
-
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // If token exists, redirect to the dashboard
+      router.push("/dashboard");
+    }
+  }, [router]);
   const handleLogin = async (e) => {
     e.preventDefault();
 

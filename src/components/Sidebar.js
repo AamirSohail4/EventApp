@@ -76,14 +76,14 @@ export function Sidebar() {
               <ul className="submenu">
                 <li>
                   <Link
-                    href="/dashboard/report/eventParticipant"
+                    href="/dashboard/report/eventParticipan"
                     className={`nav-link ${
-                      isActive("/dashboard/report/eventParticipant")
+                      isActive("/dashboard/report/eventParticipan")
                         ? "active"
                         : ""
                     }`}
                   >
-                    Event Participants
+                    Event Participant
                   </Link>
                 </li>
                 <li>

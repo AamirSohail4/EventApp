@@ -11,8 +11,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { renderToStaticMarkup } from "react-dom/server"; // Import renderToStaticMarkup
 import QRCode from "react-qr-code";
-
-export default function AddParticipant() {
+import withAuth from "@/components/Hoc"; // Import the HOC
+function AddParticipant() {
   const {
     event,
     userId,
@@ -799,3 +799,5 @@ export default function AddParticipant() {
     </div>
   );
 }
+
+export default withAuth(AddParticipant);

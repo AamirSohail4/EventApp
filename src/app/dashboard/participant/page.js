@@ -10,8 +10,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { renderToStaticMarkup } from "react-dom/server"; // Import renderToStaticMarkup
 import QRCode from "react-qr-code";
+import withAuth from "@/components/Hoc"; // Import the HOC
 
-export default function Participant() {
+function Participant() {
   const { participant, userId, displayParticipant, roleId } = useAppContext();
   const [loading, setLoading] = useState(null);
   const [isloading, setIsLoading] = useState(null);
@@ -38,20 +39,38 @@ export default function Participant() {
   const currentEvents = sortedEvents.slice(indexOfFirstEvent, indexOfLastEvent);
   const totalPages = Math.ceil(sortedEvents.length / eventsPerPage);
 
-  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+  // Logic for displaying page numbers (show maximum of 5 page buttons at a time)
+  const pageNumbers = [];
+  const maxPageButtons = 5;
+  let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+  let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
 
-  // Pagination functions
+  if (endPage - startPage + 1 < maxPageButtons) {
+    startPage = Math.max(1, endPage - maxPageButtons + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    pageNumbers.push(i);
+  }
+
+  // Handle page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Pagination controls for previous and next
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
   };
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
   const handleDelete = async (id) => {
     // Confirm deletion action
     if (
@@ -83,184 +102,7 @@ export default function Participant() {
       }
     }
   };
-  //new code parinting Certificate
-  // const handlePrintCertificate = async (id) => {
-  //   try {
-  //     setLoading(id); // Start loading
 
-  //     // Step 1: Fetch participant data
-  //     const res = await fetch(
-  //       `http://51.112.24.26:5001/api/participant/getOne/${id}`
-  //     );
-  //     const fetchdata = await res.json();
-  //     const maindata = fetchdata.data;
-
-  //     console.log("Fetched Data:", maindata);
-
-  //     const eventDate = new Date(maindata.event_from_date);
-  //     const day = eventDate.toLocaleDateString("en-US", { weekday: "long" });
-  //     const month = eventDate.toLocaleDateString("en-US", { month: "long" });
-  //     const date = eventDate.getDate();
-  //     const year = eventDate.getFullYear();
-  //     const shortYear = year.toString().slice(-2);
-
-  //     // Determine the ordinal suffix
-  //     const suffix = (() => {
-  //       if (date % 10 === 1 && date !== 11) return "st";
-  //       if (date % 10 === 2 && date !== 12) return "nd";
-  //       if (date % 10 === 3 && date !== 13) return "rd";
-  //       return "th";
-  //     })();
-  //     const formattedId = String(id).padStart(6, "0"); // Format ID as 000001
-  //     const text = `LTBA-${formattedId}-${shortYear}`;
-  //     // Step 2: Load the certificate image
-  //     const imgUrl = `http://51.112.24.26:5001/${maindata.event_certificate_file_path}`;
-  //     const img = await fetch(imgUrl);
-  //     const blob = await img.blob();
-  //     const imgBase64 = await blobToBase64(blob);
-
-  //     // Step 3: Create a canvas and draw the certificate image
-  //     const canvas = document.createElement("canvas");
-  //     const ctx = canvas.getContext("2d");
-
-  //     const image = new window.Image();
-  //     image.src = imgBase64;
-
-  //     // Wait for the image to load
-  //     image.onload = async () => {
-  //       canvas.width = image.width;
-  //       canvas.height = image.height;
-
-  //       // Draw the certificate image on the canvas
-  //       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-  //       // Define the starting position for the first line of text
-  //       let startY = canvas.height / 2 - 20; // Starting position for participant_name
-
-  //       // Participant's name
-  //       ctx.font = " 76px Arial";
-  //       ctx.fillStyle = "#000";
-  //       ctx.textAlign = "left";
-  //       ctx.fillText(maindata.participant_name, 400, startY);
-  //       // text
-
-  //       // Increment the y-position for the next line
-  //       startY += 200;
-  //       // Event name with word spacing
-  //       ctx.font = "bold 50px Arial";
-  //       ctx.fillStyle = "#9f3332";
-  //       let eventNameX = 230;
-  //       const eventNameWords = maindata.event_name.split(" "); // Split the event name into words
-  //       eventNameWords.forEach((word) => {
-  //         ctx.fillText(word, eventNameX, startY); // Draw each word
-  //         eventNameX += ctx.measureText(word).width + 20; // Add spacing between words (20px)
-  //       });
-
-  //       // // Event name
-  //       // ctx.font = "bold 50px Arial";
-  //       // ctx.fillStyle = "#9f3332";
-  //       // ctx.fillText(maindata.event_name, 230, startY);
-
-  //       // Increment the y-position for the next line
-  //       startY += 200;
-
-  //       // Fixed text: Lahore Tax Bar Association
-  //       ctx.font = "bold 50px Arial"; // Individual font size
-  //       ctx.fillStyle = "#0ca95d"; // Color for fixed text
-  //       ctx.fillText("Lahore Tax Bar Association", 510, startY);
-
-  //       // Move the starting position 300px below the fixed text
-  //       startY += 130;
-
-  //       // Base positions for date text
-  //       let startX = 510; // Starting X position
-
-  //       // Set font for the date text
-  //       ctx.font = " 40px Arial";
-  //       ctx.fillStyle = "#000";
-  //       ctx.textAlign = "left";
-
-  //       // Draw day
-  //       ctx.fillText(`${day},`, startX, startY);
-
-  //       // Measure and increment X position
-  //       startX += ctx.measureText(`${day}, `).width;
-
-  //       // Draw date
-  //       ctx.fillText(`${date}`, startX, startY);
-
-  //       // Adjust for suffix position (slightly above the main text)
-  //       ctx.font = "20px Arial"; // Smaller font for the suffix
-  //       ctx.fillText(
-  //         suffix,
-  //         startX + ctx.measureText(`${date}`).width + 25,
-  //         startY - 10
-  //       );
-
-  //       // Reset font and increment X for "of"
-  //       ctx.font = " 40px Arial";
-  //       startX += ctx.measureText(`${date}${suffix}`).width - 20;
-
-  //       // Draw "of Month"
-  //       ctx.fillText(` of ${month},`, startX, startY);
-
-  //       // Increment X for year
-  //       startX += ctx.measureText(` of ${month}, `).width;
-
-  //       // Draw year
-  //       ctx.fillText(`${year}`, startX, startY);
-
-  //       startY += 330;
-  //       ctx.font = " 20px Arial";
-  //       ctx.fillStyle = "#ffffff";
-  //       ctx.textAlign = "left";
-  //       ctx.fillText(text, 2180, startY);
-  //       // Step 4: Generate the QR code image for the bottom-right corner
-  //       const qrCodeDataURL = await generateQRCodeImage(
-  //         maindata.id,
-  //         maindata.participant_name
-  //       );
-
-  //       // Step 5: Draw the QR code onto the canvas
-  //       const qrImage = new window.Image();
-  //       qrImage.src = qrCodeDataURL;
-  //       qrImage.onload = () => {
-  //         const qrSize = 200;
-  //         // Size of the QR code
-  //         const xPosition = canvas.width - qrSize - 200; // Position from the right
-  //         const yPosition = canvas.height - qrSize - 100; // Position from the bottom
-  //         ctx.drawImage(qrImage, xPosition, yPosition, qrSize, qrSize);
-
-  //         // Create the PDF with the certificate and QR code
-  //         const updatedImgBase64 = canvas.toDataURL("image/png");
-
-  //         // Generate the PDF using jsPDF
-  //         const pdf = new jsPDF({
-  //           orientation: "landscape",
-  //           unit: "px",
-  //           format: [canvas.width, canvas.height],
-  //         });
-
-  //         pdf.addImage(
-  //           updatedImgBase64,
-  //           "PNG",
-  //           0,
-  //           0,
-  //           canvas.width,
-  //           canvas.height
-  //         );
-
-  //         // Save the PDF locally or process further
-  //         pdf.save(`${maindata.participant_name}-Certificate.pdf`);
-  //         setLoading(null); // End loading
-  //       };
-  //     };
-  //   } catch (error) {
-  //     console.error("Error occurred while processing the certificate:", error);
-  //     alert("An error occurred while processing the certificate.");
-  //     setLoading(null); // End loading in case of error
-  //   }
-  // };
   const handlePrintCertificate = async (id) => {
     try {
       setLoading(id); // Start loading
@@ -1120,7 +962,45 @@ export default function Participant() {
       </table>
 
       {/* Pagination */}
-      <div className="d-flex justify-content-between">
+
+      {/* Pagination Controls */}
+      <div className="d-flex justify-content-center mt-3">
+        {/* Previous Button */}
+        <button
+          className="btn btn-secondary mx-1"
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+
+        {/* Page Numbers */}
+        {pageNumbers.map((page) => (
+          <button
+            key={page}
+            className={`btn mx-1 ${
+              page === currentPage ? "btn-primary" : "btn-outline-secondary"
+            }`}
+            onClick={() => handlePageChange(page)}
+          >
+            {page}
+          </button>
+        ))}
+
+        {/* Next Button */}
+        <button
+          className="btn btn-secondary mx-1"
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+
+      <div className="text-center mt-3">
+        Page {currentPage} of {totalPages}
+      </div>
+      {/* <div className="d-flex justify-content-between">
         <button
           className="btn btn-secondary"
           onClick={handlePreviousPage}
@@ -1139,7 +1019,8 @@ export default function Participant() {
 
       <div className="text-center mt-3">
         Page {currentPage} of {totalPages}
-      </div>
+      </div> */}
     </div>
   );
 }
+export default withAuth(Participant);

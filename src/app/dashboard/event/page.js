@@ -8,12 +8,13 @@ import {
 } from "react-icons/fa"; // Font Awesome React Icons
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import { useAppContext } from "@/context/AppContext";
 import { format } from "date-fns";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
+import withAuth from "@/components/Hoc"; // Import the HOC
 
-export default function Event() {
+function Event() {
   const { event, eventDisplay } = useAppContext();
   const router = useRouter();
 
@@ -30,7 +31,21 @@ export default function Event() {
   const currentEvents = sortedEvents.slice(indexOfFirstEvent, indexOfLastEvent);
   const totalPages = Math.ceil(sortedEvents.length / eventsPerPage);
 
-  // Page change handler
+  // Logic for displaying page numbers (show maximum of 5 page buttons at a time)
+  const pageNumbers = [];
+  const maxPageButtons = 5;
+  let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+  let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+
+  if (endPage - startPage + 1 < maxPageButtons) {
+    startPage = Math.max(1, endPage - maxPageButtons + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    pageNumbers.push(i);
+  }
+
+  // Handle page change
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -48,7 +63,7 @@ export default function Event() {
     }
   };
 
-  // **Handle returning to specific page after update**
+  // Fetch the correct page on mount (from query params)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const page = urlParams.get("page");
@@ -130,10 +145,6 @@ export default function Event() {
                     alt="Event Certificate"
                     width={50}
                     height={50}
-                    // style={{
-                    //   border: "2px solid",
-                    //   objectFit: "contain",
-                    // }}
                   />
                 </td>
                 <td style={{ textAlign: "center", verticalAlign: "middle" }}>
@@ -146,10 +157,6 @@ export default function Event() {
                     alt="Event Banner"
                     width={50}
                     height={50}
-                    // style={{
-                    //   border: "2px solid",
-                    //   objectFit: "contain",
-                    // }}
                   />
                 </td>
                 <td style={{ textAlign: "center", verticalAlign: "middle" }}>
@@ -182,17 +189,33 @@ export default function Event() {
         </tbody>
       </table>
 
-      {/* Pagination */}
-      <div className="d-flex justify-content-between">
+      {/* Pagination Controls */}
+      <div className="d-flex justify-content-center mt-3">
+        {/* Previous Button */}
         <button
-          className="btn btn-secondary"
+          className="btn btn-secondary mx-1"
           onClick={handlePreviousPage}
           disabled={currentPage === 1}
         >
           Previous
         </button>
+
+        {/* Page Numbers */}
+        {pageNumbers.map((page) => (
+          <button
+            key={page}
+            className={`btn mx-1 ${
+              page === currentPage ? "btn-primary" : "btn-outline-secondary"
+            }`}
+            onClick={() => handlePageChange(page)}
+          >
+            {page}
+          </button>
+        ))}
+
+        {/* Next Button */}
         <button
-          className="btn btn-secondary"
+          className="btn btn-secondary mx-1"
           onClick={handleNextPage}
           disabled={currentPage === totalPages}
         >
@@ -206,3 +229,4 @@ export default function Event() {
     </div>
   );
 }
+export default withAuth(Event);

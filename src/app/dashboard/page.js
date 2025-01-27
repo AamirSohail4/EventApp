@@ -3,19 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
+import withAuth from "@/components/Hoc"; // Import the HOC
 
-export default function Dashboard() {
+function Dashboard() {
   const { event, participant, roleId, userId, getTokenAndSetUserId } =
     useAppContext();
+  const { authData } = useAuth();
   const router = useRouter();
+  const token = authData?.token;
 
-  useEffect(() => {
-    if (roleId == 2) {
-      router.push("/dashboard");
-    } else {
-      router.push("/auth/login");
-    }
-  }, [roleId, router]);
+  console.log("Hello Aamir ", authData?.token);
 
   return (
     <main className="main_container">
@@ -45,3 +43,5 @@ export default function Dashboard() {
     </main>
   );
 }
+
+export default withAuth(Dashboard);

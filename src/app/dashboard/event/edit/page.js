@@ -8,7 +8,7 @@ import axios from "axios";
 import "react-datepicker/dist/react-datepicker.css";
 import Image from "next/image";
 import NextImage from "next/image";
-
+import withAuth from "@/components/Hoc"; // Import the HOC
 function EditEventContent() {
   const {
     event,
@@ -406,10 +406,21 @@ function EditEventContent() {
   );
 }
 
-export default function EditEvent() {
+// export default function EditEvent() {
+//   return (
+//     <Suspense fallback={<div>Loading...</div>}>
+//       <EditEventContent />
+//     </Suspense>
+//   );
+// }
+// export default withAuth(AddEvent);
+
+function EditEvent() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <EditEventContent />
     </Suspense>
   );
 }
+
+export default withAuth(EditEvent);

@@ -5,11 +5,10 @@ import axios from "axios";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
-export default function AddEvent() {
+import withAuth from "@/components/Hoc"; // Import the HOC
+function AddEvent() {
   const {
     eventDisplay,
     eventParticipantDisplay,
@@ -363,3 +362,4 @@ export default function AddEvent() {
     </div>
   );
 }
+export default withAuth(AddEvent);

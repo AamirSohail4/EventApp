@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import withAuth from "@/components/Hoc"; // Import the HOC
 
 function EditParticipantContent() {
   const [isSubmitting, setIsSubmitting] = useState(false); // State for button loading
@@ -306,10 +307,12 @@ function EditParticipantContent() {
   );
 }
 
-export default function EditParticipantContentWithSuspense() {
+function EditParticipantContentWithSuspense() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <EditParticipantContent />
     </Suspense>
   );
 }
+
+export default withAuth(EditParticipantContentWithSuspense);
